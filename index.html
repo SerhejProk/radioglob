@@ -176,20 +176,20 @@
       radial-gradient(circle at 10% 95%, rgba(202, 138, 4, .14), transparent 50%);
     -webkit-mask-image: linear-gradient(to bottom, #000 35%, rgba(0,0,0,.5));
     mask-image: linear-gradient(to bottom, #000 35%, rgba(0,0,0,.5)); }
-  /* Юмор — комеди-клуб: кирпичная стена, луч прожектора, в углу микрофон на стойке, смеющийся смайлик и облачко «ХА-ХА!» */
+  /* Юмор — комеди-клуб: кирпичная стена, луч прожектора, в углу микрофон на стойке */
   [data-style="humor"] .waves {
     background:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240' font-family='Arial,sans-serif' font-weight='bold'%3E%3Crect x='6' y='8' width='118' height='46' rx='23' fill='rgb(245,158,11)' fill-opacity='.22'/%3E%3Cpath d='M40 52l-10 18 26-16Z' fill='rgb(245,158,11)' fill-opacity='.22'/%3E%3Ctext x='65' y='40' text-anchor='middle' font-size='22' fill='rgb(234,88,12)' fill-opacity='.7'%3E%D0%A5%D0%90-%D0%A5%D0%90!%3C/text%3E%3Ccircle cx='182' cy='72' r='40' fill='rgb(250,204,21)' fill-opacity='.32' stroke='rgb(234,88,12)' stroke-opacity='.35' stroke-width='2'/%3E%3Cpath d='M162 64q7-10 14 0M188 64q7-10 14 0' stroke='rgb(124,45,18)' stroke-opacity='.5' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Cpath d='M158 80q24 30 48 0Z' fill='rgb(234,88,12)' fill-opacity='.45'/%3E%3Ccircle cx='160' cy='78' r='5' fill='rgb(244,114,182)' fill-opacity='.35'/%3E%3Ccircle cx='204' cy='78' r='5' fill='rgb(244,114,182)' fill-opacity='.35'/%3E%3Crect x='60' y='112' width='30' height='40' rx='15' fill='rgb(55,65,81)' fill-opacity='.32'/%3E%3Cpath d='M66 122h18M66 130h18M66 138h18' stroke='rgb(255,255,255)' stroke-opacity='.3' stroke-width='1.5'/%3E%3Cpath d='M68 152h14l-3 22h-8Z' fill='rgb(55,65,81)' fill-opacity='.28'/%3E%3Cpath d='M75 174v52' stroke='rgb(55,65,81)' stroke-opacity='.3' stroke-width='3'/%3E%3Cellipse cx='75' cy='228' rx='26' ry='5' fill='rgb(55,65,81)' fill-opacity='.25'/%3E%3Crect x='128' y='150' width='72' height='34' rx='17' fill='rgb(250,204,21)' fill-opacity='.2'/%3E%3Ctext x='164' y='174' text-anchor='middle' font-size='18' fill='rgb(217,119,6)' fill-opacity='.65'%3E%D1%85%D0%B0-%D1%85%D0%B0%3C/text%3E%3C/svg%3E") no-repeat right -6px top 18px / 300px 300px,
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 240'%3E%3Crect x='45' y='40' width='30' height='40' rx='15' fill='rgb(55,65,81)' fill-opacity='.32'/%3E%3Cpath d='M51 50h18M51 58h18M51 66h18' stroke='rgb(255,255,255)' stroke-opacity='.3' stroke-width='1.5'/%3E%3Cpath d='M53 80h14l-3 22h-8Z' fill='rgb(55,65,81)' fill-opacity='.28'/%3E%3Cpath d='M60 102v124' stroke='rgb(55,65,81)' stroke-opacity='.3' stroke-width='3'/%3E%3Cellipse cx='60' cy='228' rx='30' ry='6' fill='rgb(55,65,81)' fill-opacity='.25'/%3E%3C/svg%3E") no-repeat right 24px top 10px / 120px 240px,
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='32' fill='none' stroke='rgb(180,83,9)' stroke-opacity='.12' stroke-width='1.2'%3E%3Cpath d='M0 .6H64M0 16.6H64M32 0V16M0 16V32'/%3E%3C/svg%3E") 0 0 / 64px 32px,
       radial-gradient(ellipse 45% 70% at 50% -10%, rgba(253, 224, 71, .30), transparent 70%),
       radial-gradient(circle at 0% 100%, rgba(234, 88, 12, .18), transparent 50%);
     -webkit-mask-image: linear-gradient(to bottom, #000 40%, rgba(0,0,0,.45));
     mask-image: linear-gradient(to bottom, #000 40%, rgba(0,0,0,.45)); }
-  /* На телефоне картинка меньше и правее, чтобы облачко не наезжало на заголовок */
+  /* На телефоне микрофон меньше, чтобы не мешать заголовку */
   @media (max-width: 640px) {
     [data-style="humor"] .waves {
-      background-size: 210px 210px, 64px 32px, auto, auto;
-      background-position: right -30px top 18px, 0 0, 0 0, 0 0; } }
+      background-size: 90px 180px, 64px 32px, auto, auto;
+      background-position: right 8px top 10px, 0 0, 0 0, 0 0; } }
   @keyframes drift { from { background-position: 0% 0%; } to { background-position: 100% 100%; } }
   @media (prefers-reduced-motion: reduce) { [data-style="chill"] .waves { animation: none; } }
   /* Антенна и бегущие волны, пока играет станция */
