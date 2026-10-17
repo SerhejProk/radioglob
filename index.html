@@ -243,7 +243,7 @@
   .opts { display: flex; gap: 16px; align-items: center; color: var(--on-page-muted, var(--muted)); font-size: 13px; margin-top: 12px; flex-wrap: wrap; }
   .opts input { accent-color: var(--accent); }
   main { max-width: 1100px; margin: 0 auto; padding: 8px 16px; }
-  .status { color: var(--on-page-muted, var(--muted)); margin: 8px 0 14px; min-height: 1.4em; }  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; }
+  .status { color: var(--on-page-muted, var(--muted)); margin: 8px 0 14px; min-height: 1.4em; }  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px; }
   .card { display: flex; gap: 12px; align-items: center; padding: 12px; background: var(--bg);
     border-radius: 18px; box-shadow: var(--out); cursor: pointer; min-width: 0; }
   .card:hover { transform: translateY(-1px); }
@@ -255,6 +255,9 @@
   .logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
   .info { flex: 1; min-width: 0; }
   .name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* Шрифт только заглавный и широкий — в карточке название переносится на вторую строку, а не обрезается после 15 букв */
+  .card .name { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+    font-size: 14px; line-height: 1.25; letter-spacing: 0; overflow-wrap: anywhere; margin-bottom: 3px; }
   .meta { color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .fav { font-size: 17px; width: 36px; height: 36px; border-radius: 50%; padding: 0; flex: none; color: var(--muted); box-shadow: var(--out-sm); }
   .fav:active, .fav.on { box-shadow: var(--in-sm); }
@@ -555,8 +558,28 @@
 
   button, .card { -webkit-tap-highlight-color: transparent; }
   /* На телефоне громкость регулируют кнопками на корпусе — ползунок только мешает названию */
-  @media (max-width: 520px) { .volbox { display: none; } h1 { font-size: 36px; } .grid { gap: 14px; }
-    .search select { flex: 1 1 100%; } .btn { flex: 1 1 100%; } }
+  /* Компактная шапка на телефоне: заголовок, язык и тема в одну строку, страна и «Найти» рядом,
+     подборки — одной лентой с прокруткой вбок, чтобы станции были видны уже на первом экране */
+  @media (max-width: 520px) { .volbox { display: none; } .grid { gap: 14px; }
+    .top { gap: 8px; flex-wrap: nowrap; }
+    .top h1 { font-size: 30px; letter-spacing: .05em; margin-right: auto; }
+    .lang { padding: 5px 9px; }
+    .skin-btn { padding: 5px 10px; }
+    .skin-btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .skin-btn svg { width: 18px; height: 18px; }
+    .lang, .skin-btn { min-height: 34px; }
+    .sub { margin: 6px 0 12px; font-size: 13px; }
+    .search { gap: 10px; }
+    .search input { flex: 1 1 100%; }
+    .search select { flex: 1 1 0; min-width: 0; }
+    .btn { flex: none; padding: 12px 18px; }
+    .chips { flex-wrap: nowrap; overflow-x: auto; gap: 10px; margin: 12px -16px 0; padding: 6px 16px 12px;
+      scrollbar-width: none; -webkit-overflow-scrolling: touch;
+      -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent);
+      mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); }
+    .chips::-webkit-scrollbar { display: none; }
+    .chip { flex: none; white-space: nowrap; }
+    .opts { margin-top: 2px; } }
 </style>
 </head>
 <body>
@@ -1095,9 +1118,18 @@ function logoSources(s) {
   return list;
 }
 
+// Каталог отдаёт страну по-английски («The Russian Federation») — показываем её на языке сайта по коду страны
+const regionNames = {};
+function countryName(s) {
+  if (!s.countrycode) return s.country || "";
+  try {
+    regionNames[lang] = regionNames[lang] || new Intl.DisplayNames([lang], { type: "region" });
+    return regionNames[lang].of(s.countrycode.toUpperCase()) || s.country || "";
+  } catch (e) { return s.country || ""; }
+}
 function metaText(s) {
   const tags = (s.tags || "").split(",").filter(Boolean).slice(0, 3).join(", ");
-  return [s.country, tags, s.bitrate ? s.bitrate + " kbps" : ""].filter(Boolean).join(" · ");
+  return [countryName(s), tags, s.bitrate ? s.bitrate + " kbps" : ""].filter(Boolean).join(" · ");
 }
 
 function card(s) {
@@ -1110,6 +1142,7 @@ function card(s) {
   info.innerHTML = '<div class="name"></div><div class="meta"></div>';
   info.firstChild.textContent = s.name.trim();
   info.lastChild.textContent = metaText(s);
+  c.title = s.name.trim();
   c.appendChild(info);
   const f = document.createElement("button");
   const isFav = () => favs.some(x => x.stationuuid === s.stationuuid);
@@ -1189,7 +1222,7 @@ function nextUrl() {
 let nowSong = "", songTimer = null, userPaused = false;
 function setMarquee(note) {
   const el = $("nowMeta");
-  const parts = [current.name.trim(), current.country, (current.tags || "").split(",").filter(Boolean).slice(0, 3).join(", "),
+  const parts = [current.name.trim(), countryName(current), (current.tags || "").split(",").filter(Boolean).slice(0, 3).join(", "),
     current.bitrate ? current.bitrate + " kbps" : ""].filter(Boolean);
   el.className = "meta marq";
   el.innerHTML = '<span class="track"><span></span><span></span></span>';
@@ -1204,7 +1237,7 @@ function setMarquee(note) {
   el.style.setProperty("--dur", Math.max(10, Math.round(len * 0.28)) + "s"); // скорость одинаковая при любой длине
   const name = current.name.trim();
   if (note) setTitleMarquee("", "⏳ " + name);
-  else setTitleMarquee(nowSong ? "♪ " + nowSong + " · " + name : name + (current.country ? " · " + current.country : ""));
+  else setTitleMarquee(nowSong ? "♪ " + nowSong + " · " + name : name + (countryName(current) ? " · " + countryName(current) : ""));
 }
 function stopMarquee(text) {
   const el = $("nowMeta");
@@ -1613,6 +1646,10 @@ document.querySelectorAll(".lang").forEach(b => b.onclick = () => {
   else if (lastList.length && $("grid").querySelector(".card")) {
     $("status").textContent = t("found", lastList.length);
     $("grid").querySelectorAll(".fav").forEach(f => { f.title = t("favTitle"); });
+    $("grid").querySelectorAll(".card").forEach(c => {
+      const s = lastList.find(x => x.stationuuid === c.dataset.id), m = c.querySelector(".meta");
+      if (s && m) m.textContent = metaText(s);
+    });
   } else {
     const e = $("grid").querySelector(".empty"), on = document.querySelector(".chip.on");
     const p = on ? PRESETS[[].indexOf.call(document.querySelectorAll(".chip"), on)] : null;
