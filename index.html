@@ -1,0 +1,963 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#e4e8ee">
+<title>РАДИО</title>
+<meta name="apple-mobile-web-app-title" content="РАДИО">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+<!-- Можно установить как приложение (Edge/Chrome): своё окно и своя иконка в панели задач -->
+<link rel="manifest" href="manifest.webmanifest">
+<!-- Превью ссылки в Telegram/WhatsApp: пересылать надо ссылку, а не файл -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="РАДИО">
+<meta property="og:description" content="Тысячи радиостанций со всего мира: Россия, Беларусь, Казахстан, жанры, избранное.">
+<meta property="og:url" content="https://radioglob.ru/">
+<meta property="og:image" content="https://radioglob.ru/icon-512.png">
+<meta name="description" content="Тысячи радиостанций со всего мира: Россия, Беларусь, Казахстан, жанры, избранное.">
+<script>
+// Где открыта страница. Радио работает только как сайт в обычном браузере:
+// - файл, пересланный в Telegram, открывается в просмотрщике, где сеть и скрипты не работают;
+// - встроенный браузер Telegram глушит звук, когда сворачиваешь Telegram.
+// Скрипт сам уводит со страницы-файла на сайт; если скрипты отключены — остаётся видимая кнопка.
+(function () {
+  var SITE = "https://radioglob.ru/";
+  var root = document.documentElement;
+  if (!/^https?:$/.test(location.protocol)) { location.replace(SITE); return; }
+  root.className += " web";
+  var tg = window.TelegramWebviewProxy || window.TelegramWebview || /Telegram/i.test(navigator.userAgent);
+  if (tg) root.className += " tg";
+})();
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
+<script>
+// Тема по времени суток: с 7:00 до 20:00 светлая, остальное время тёмная. Проверяем раз в минуту.
+// Для проверки можно открыть страницу с ?theme=night или ?theme=day.
+(function () {
+  var forced = (location.search.match(/theme=(day|night)/) || [])[1];
+  function apply() {
+    var h = new Date().getHours();
+    var night = forced ? forced === "night" : (h < 7 || h >= 20);
+    document.documentElement.setAttribute("data-theme", night ? "night" : "day");
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", night ? "#2a2d34" : "#e4e8ee");
+  }
+  apply();
+  setInterval(apply, 60000);
+})();
+</script>
+<style>
+  /* Неоморфизм: всё вылеплено из одного «пластика», свет падает слева сверху */
+  /* Фон «Радиоволны»: круги расходятся от антенны в правом верхнем углу.
+     Днём светлая тема, с 20:00 до 7:00 тёмная — тему ставит скрипт по часам (data-theme на <html>) */
+  :root {
+    --bg: #e4e8ee; --text: #2d3748; --muted: #718096; --accent: #2b6cb0;
+    --light: #ffffff; --dark: #b8bec7; --ring: rgba(43, 108, 176, .13);
+    --page: var(--bg); --edge: transparent;
+    --out: 6px 6px 12px var(--dark), -6px -6px 12px var(--light);
+    --out-sm: 3px 3px 6px var(--dark), -3px -3px 6px var(--light);
+    --in: inset 4px 4px 8px var(--dark), inset -4px -4px 8px var(--light);
+    --in-sm: inset 2px 2px 4px var(--dark), inset -2px -2px 4px var(--light);
+  }
+  /* Ночью кнопки и карточки светлее фона и с тонким светлым кантом — чтобы не сливались с темнотой */
+  :root[data-theme="night"] {
+    --page: #1a1c21; --bg: #2f333c; --text: #edf2f7; --muted: #a0aec0; --accent: #63b3ed;
+    --light: #414753; --dark: #101114; --ring: rgba(99, 179, 237, .12); --edge: rgba(255, 255, 255, .09);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--text);
+    font: 15px/1.45 "Segoe UI", system-ui, sans-serif; padding-bottom: 120px; }
+  /* Неподвижный слой с волнами (background-attachment: fixed не работает на айфоне), к краям волны тают */
+  .waves { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; pointer-events: none; overflow: hidden;
+    background: repeating-radial-gradient(circle at calc(100% - 44px) 44px, transparent 0 56px, var(--ring) 56px 58px);
+    -webkit-mask-image: radial-gradient(circle at calc(100% - 44px) 44px, #000 0, transparent 900px);
+    mask-image: radial-gradient(circle at calc(100% - 44px) 44px, #000 0, transparent 900px);
+    transition: opacity .3s ease; }
+  .waves.fade { opacity: 0; }
+  /* Фон под стиль музыки: data-style на <html> ставится при выборе подборки жанра.
+     Только CSS-узоры, без картинок — полупрозрачные, чтобы не мешать читать карточки */
+  [data-style] .waves { -webkit-mask-image: none; mask-image: none; }
+  /* Поп — конфетти и пузырьки */
+  [data-style="pop"] .waves {
+    background:
+      radial-gradient(circle, rgba(236, 72, 153, .28) 0 5px, transparent 6px) 0 0 / 72px 72px,
+      radial-gradient(circle, rgba(139, 92, 246, .24) 0 3px, transparent 4px) 36px 30px / 72px 72px,
+      radial-gradient(circle, rgba(250, 204, 21, .30) 0 4px, transparent 5px) 18px 52px / 110px 110px,
+      radial-gradient(circle at 85% 10%, rgba(236, 72, 153, .22), transparent 45%),
+      radial-gradient(circle at 10% 90%, rgba(139, 92, 246, .20), transparent 50%); }
+  /* Рок — резкие косые разрезы и красное зарево снизу */
+  [data-style="rock"] .waves {
+    background:
+      repeating-linear-gradient(-60deg, transparent 0 46px, rgba(220, 38, 38, .16) 46px 52px, transparent 52px 70px, rgba(31, 41, 55, .12) 70px 73px, transparent 73px 120px),
+      radial-gradient(ellipse at 50% 110%, rgba(220, 38, 38, .30), transparent 60%),
+      linear-gradient(to bottom, rgba(17, 24, 39, .10), transparent 40%); }
+  /* Джаз — виниловая пластинка и тёплый «дымный» свет */
+  [data-style="jazz"] .waves {
+    background:
+      radial-gradient(circle at 100% 70%, rgba(180, 83, 9, .30) 0 40px, transparent 41px),
+      repeating-radial-gradient(circle at 100% 70%, transparent 0 7px, rgba(217, 119, 6, .16) 7px 8px),
+      radial-gradient(circle at 15% 25%, rgba(217, 119, 6, .24), transparent 45%),
+      radial-gradient(circle at 60% 55%, rgba(180, 83, 9, .12), transparent 50%);
+    -webkit-mask-image: radial-gradient(circle at 100% 70%, #000 0, #000 300px, rgba(0,0,0,.3) 700px);
+    mask-image: radial-gradient(circle at 100% 70%, #000 0, #000 300px, rgba(0,0,0,.3) 700px); }
+  /* Классика — нотный стан и бордово-золотое свечение */
+  [data-style="classical"] .waves {
+    background:
+      linear-gradient(to bottom, transparent 0 40px, rgba(127, 29, 29, .20) 40px 41px, transparent 41px 52px,
+        rgba(127, 29, 29, .20) 52px 53px, transparent 53px 64px, rgba(127, 29, 29, .20) 64px 65px, transparent 65px 76px,
+        rgba(127, 29, 29, .20) 76px 77px, transparent 77px 88px, rgba(127, 29, 29, .20) 88px 89px, transparent 89px) 0 0 / 100% 150px,
+      radial-gradient(ellipse at 50% 0%, rgba(202, 138, 4, .22), transparent 60%),
+      radial-gradient(ellipse at 50% 100%, rgba(127, 29, 29, .16), transparent 55%); }
+  /* Электроника — неоновая сетка, бирюза и пурпур */
+  [data-style="electronic"] .waves {
+    background:
+      linear-gradient(rgba(6, 182, 212, .20) 1px, transparent 1px) 0 0 / 40px 40px,
+      linear-gradient(90deg, rgba(6, 182, 212, .20) 1px, transparent 1px) 0 0 / 40px 40px,
+      radial-gradient(circle at 0% 100%, rgba(217, 70, 239, .30), transparent 50%),
+      radial-gradient(circle at 100% 0%, rgba(6, 182, 212, .30), transparent 50%);
+    -webkit-mask-image: linear-gradient(to top, #000, rgba(0,0,0,.35));
+    mask-image: linear-gradient(to top, #000, rgba(0,0,0,.35)); }
+  /* Ретро — закат 70-х: полосы горчичного, оранжевого, коричневого и солнце */
+  [data-style="retro"] .waves {
+    background:
+      radial-gradient(circle at 50% 72%, rgba(251, 146, 60, .30) 0 110px, transparent 111px),
+      linear-gradient(to bottom, transparent 0 62%, rgba(234, 179, 8, .15) 62% 70%, transparent 70% 72%,
+        rgba(249, 115, 22, .15) 72% 80%, transparent 80% 82%, rgba(194, 65, 12, .15) 82% 90%, transparent 90% 92%,
+        rgba(120, 53, 15, .15) 92% 100%),
+      radial-gradient(ellipse at 50% 0%, rgba(234, 179, 8, .14), transparent 60%); }
+  /* Lounge / Chill — мягкие плывущие пятна: бирюза, лаванда, персик */
+  [data-style="chill"] .waves {
+    background:
+      radial-gradient(circle at 20% 30%, rgba(45, 212, 191, .30), transparent 40%),
+      radial-gradient(circle at 80% 20%, rgba(167, 139, 250, .28), transparent 42%),
+      radial-gradient(circle at 60% 85%, rgba(251, 191, 160, .30), transparent 45%);
+    background-size: 160% 160%;
+    animation: drift 30s ease-in-out infinite alternate; }
+  /* Наука — атом с орбитами электронов, сетка-«молекула» из шестиугольников, космический индиго и бирюза */
+  [data-style="science"] .waves {
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none' stroke='rgb(99,102,241)' stroke-opacity='.4' stroke-width='1.6'%3E%3Cellipse cx='100' cy='100' rx='92' ry='30'/%3E%3Cellipse cx='100' cy='100' rx='92' ry='30' transform='rotate(60 100 100)'/%3E%3Cellipse cx='100' cy='100' rx='92' ry='30' transform='rotate(120 100 100)'/%3E%3Ccircle cx='100' cy='100' r='9' fill='rgb(6,182,212)' fill-opacity='.5' stroke='none'/%3E%3Ccircle cx='192' cy='100' r='4' fill='rgb(99,102,241)' fill-opacity='.6' stroke='none'/%3E%3Ccircle cx='54' cy='20' r='4' fill='rgb(6,182,212)' fill-opacity='.6' stroke='none'/%3E%3Ccircle cx='54' cy='180' r='4' fill='rgb(168,85,247)' fill-opacity='.6' stroke='none'/%3E%3C/svg%3E") no-repeat right -70px top 30px / 340px 340px,
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' fill='none' stroke='rgb(99,102,241)' stroke-opacity='.16' stroke-width='1'%3E%3Cpath d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100'/%3E%3Ccircle cx='28' cy='0' r='2' fill='rgb(6,182,212)' fill-opacity='.3' stroke='none'/%3E%3Ccircle cx='0' cy='50' r='2' fill='rgb(6,182,212)' fill-opacity='.3' stroke='none'/%3E%3Ccircle cx='56' cy='50' r='2' fill='rgb(6,182,212)' fill-opacity='.3' stroke='none'/%3E%3C/svg%3E") 0 0 / 56px 100px,
+      radial-gradient(circle at 15% 20%, rgba(99, 102, 241, .22), transparent 45%),
+      radial-gradient(circle at 85% 90%, rgba(6, 182, 212, .20), transparent 50%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 40%, rgba(0,0,0,.45));
+    mask-image: linear-gradient(to bottom, #000 40%, rgba(0,0,0,.45)); }
+  /* Фолк — славянский орнамент-вышивка красной и охристой нитью, тёплый «деревянный» свет */
+  [data-style="folk"] .waves {
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cg fill='rgb(185,28,28)' fill-opacity='.13'%3E%3Cpath d='M24 6L30 12L24 18L18 12Z'/%3E%3Cpath d='M24 30L30 36L24 42L18 36Z'/%3E%3Cpath d='M6 24L12 30L6 36L0 30ZM6 12L12 18L6 24L0 18Z' transform='translate(0 -6)'/%3E%3Cpath d='M42 18L48 24L42 30L36 24Z'/%3E%3Cpath d='M6 18L12 24L6 30L0 24Z'/%3E%3C/g%3E%3Cg fill='rgb(202,138,4)' fill-opacity='.18'%3E%3Crect x='22' y='22' width='4' height='4'/%3E%3Crect x='22' y='0' width='4' height='2'/%3E%3Crect x='22' y='46' width='4' height='2'/%3E%3Crect x='0' y='0' width='3' height='3'/%3E%3Crect x='45' y='45' width='3' height='3'/%3E%3Crect x='45' y='0' width='3' height='3'/%3E%3Crect x='0' y='45' width='3' height='3'/%3E%3C/g%3E%3Cg stroke='rgb(185,28,28)' stroke-opacity='.1' stroke-width='1.2'%3E%3Cpath d='M14 14L20 20M34 14L28 20M14 34L20 28M34 34L28 28'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 48px 48px,
+      radial-gradient(ellipse at 50% 0%, rgba(202, 138, 4, .22), transparent 60%),
+      radial-gradient(ellipse at 50% 100%, rgba(185, 28, 28, .18), transparent 55%);
+    -webkit-mask-image: linear-gradient(to bottom, #000, rgba(0,0,0,.25) 45%, rgba(0,0,0,.25) 70%, #000);
+    mask-image: linear-gradient(to bottom, #000, rgba(0,0,0,.25) 45%, rgba(0,0,0,.25) 70%, #000); }
+  /* Детям — радуга в углу, воздушные шарики, звёздочки и облака, пастельные цвета */
+  [data-style="kids"] .waves {
+    background:
+      radial-gradient(circle at 100% 0%, transparent 0 110px, rgba(239, 68, 68, .28) 110px 124px, rgba(249, 115, 22, .28) 124px 138px,
+        rgba(250, 204, 21, .30) 138px 152px, rgba(34, 197, 94, .26) 152px 166px, rgba(59, 130, 246, .26) 166px 180px,
+        rgba(139, 92, 246, .26) 180px 194px, transparent 194px),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cellipse cx='30' cy='34' rx='13' ry='16' fill='rgb(244,114,182)' fill-opacity='.35'/%3E%3Cpath d='M30 50q-4 10 2 20t-2 22' stroke='rgb(244,114,182)' stroke-opacity='.3' fill='none' stroke-width='1.2'/%3E%3Cellipse cx='118' cy='96' rx='11' ry='14' fill='rgb(96,165,250)' fill-opacity='.35'/%3E%3Cpath d='M118 110q4 9 -2 18t2 20' stroke='rgb(96,165,250)' stroke-opacity='.3' fill='none' stroke-width='1.2'/%3E%3Cpath d='M110 22l3.5 7 7.5 1-5.5 5 1.5 7.5-7-3.8-7 3.8 1.5-7.5-5.5-5 7.5-1z' fill='rgb(250,204,21)' fill-opacity='.45'/%3E%3Cpath d='M40 120l2.5 5 5.5.8-4 3.8 1 5.4-5-2.6-5 2.6 1-5.4-4-3.8 5.5-.8z' fill='rgb(52,211,153)' fill-opacity='.45'/%3E%3Cg fill='rgb(255,255,255)' fill-opacity='.28'%3E%3Cellipse cx='75' cy='70' rx='18' ry='8'/%3E%3Cellipse cx='66' cy='64' rx='9' ry='8'/%3E%3Cellipse cx='82' cy='62' rx='11' ry='10'/%3E%3C/g%3E%3Ccircle cx='145' cy='145' r='3' fill='rgb(167,139,250)' fill-opacity='.5'/%3E%3Ccircle cx='8' cy='92' r='2.5' fill='rgb(251,146,60)' fill-opacity='.5'/%3E%3C/svg%3E") 0 0 / 160px 160px,
+      radial-gradient(circle at 0% 100%, rgba(96, 165, 250, .25), transparent 50%),
+      radial-gradient(circle at 30% 30%, rgba(244, 114, 182, .14), transparent 45%); }
+  /* Обучение — тетрадь в клетку с красными полями, в углу шапочка выпускника, книга и «облачка» с буквами разных языков */
+  [data-style="study"] .waves {
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 220' font-family='Georgia,serif' font-weight='bold'%3E%3Cpath d='M110 40L180 68L110 96L40 68Z' fill='rgb(30,58,138)' fill-opacity='.4'/%3E%3Cpath d='M72 82v26q38 22 76 0V82L110 96Z' fill='rgb(30,58,138)' fill-opacity='.3'/%3E%3Cpath d='M180 68v34' stroke='rgb(202,138,4)' stroke-opacity='.6' stroke-width='2'/%3E%3Ccircle cx='180' cy='106' r='5' fill='rgb(202,138,4)' fill-opacity='.6'/%3E%3Cpath d='M50 150q30-12 60 0q30-12 60 0v50q-30-12-60 0q-30-12-60 0Z' fill='none' stroke='rgb(30,58,138)' stroke-opacity='.35' stroke-width='2'/%3E%3Cpath d='M110 150v50' stroke='rgb(30,58,138)' stroke-opacity='.35' stroke-width='2'/%3E%3Cpath d='M62 165q20-6 38 0M62 178q20-6 38 0M120 165q20-6 38 0M120 178q20-6 38 0' stroke='rgb(30,58,138)' stroke-opacity='.22' stroke-width='1.4' fill='none'/%3E%3Crect x='4' y='6' width='42' height='30' rx='8' fill='rgb(220,38,38)' fill-opacity='.16'/%3E%3Ctext x='25' y='28' text-anchor='middle' font-size='18' fill='rgb(220,38,38)' fill-opacity='.55'%3EAa%3C/text%3E%3Crect x='150' y='2' width='34' height='30' rx='8' fill='rgb(22,163,74)' fill-opacity='.16'/%3E%3Ctext x='167' y='24' text-anchor='middle' font-size='18' fill='rgb(22,163,74)' fill-opacity='.6'%3E%D0%AF%3C/text%3E%3Crect x='184' y='126' width='34' height='30' rx='8' fill='rgb(202,138,4)' fill-opacity='.18'/%3E%3Ctext x='201' y='148' text-anchor='middle' font-size='18' fill='rgb(161,98,7)' fill-opacity='.6'%3E%E6%96%87%3C/text%3E%3C/svg%3E") no-repeat right -10px top 20px / 300px 300px,
+      linear-gradient(90deg, transparent 0 36px, rgba(220, 38, 38, .30) 36px 38px, transparent 38px),
+      linear-gradient(rgba(59, 130, 246, .13) 1px, transparent 1px) 0 0 / 22px 22px,
+      linear-gradient(90deg, rgba(59, 130, 246, .13) 1px, transparent 1px) 0 0 / 22px 22px,
+      radial-gradient(circle at 85% 15%, rgba(59, 130, 246, .18), transparent 45%),
+      radial-gradient(circle at 10% 95%, rgba(202, 138, 4, .14), transparent 50%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 35%, rgba(0,0,0,.5));
+    mask-image: linear-gradient(to bottom, #000 35%, rgba(0,0,0,.5)); }
+  @keyframes drift { from { background-position: 0% 0%; } to { background-position: 100% 100%; } }
+  @media (prefers-reduced-motion: reduce) { [data-style="chill"] .waves { animation: none; } }
+  /* Антенна и бегущие волны, пока играет станция */
+  .antenna { position: fixed; top: 38px; right: 38px; width: 12px; height: 12px; border-radius: 50%;
+    background: var(--accent); z-index: -1; pointer-events: none; }
+  .antenna i { position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px;
+    border-radius: 50%; border: 2px solid var(--accent); opacity: 0; }
+  .on-air .antenna i { animation: wave 3.6s ease-out infinite; }
+  .on-air .antenna i:nth-child(2) { animation-delay: 1.2s; }
+  .on-air .antenna i:nth-child(3) { animation-delay: 2.4s; }
+  @keyframes wave { from { transform: scale(1); opacity: .55; } to { transform: scale(40); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .on-air .antenna i { animation: none; } }
+  header { max-width: 1100px; margin: 0 auto; padding: 28px 16px 8px; }
+  h1 { margin: 0 0 4px; font-size: 26px; text-shadow: 1px 1px 1px var(--light), -1px -1px 1px var(--dark); }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  .install { margin-left: 8px; padding: 4px 12px; border-radius: 999px; font-size: 13px; color: var(--accent);
+    border: 1px solid var(--edge); box-shadow: var(--out-sm); }
+  .install:active { box-shadow: var(--in-sm); }
+  .install[hidden] { display: none; }
+  .search { display: flex; gap: 14px; flex-wrap: wrap; }
+  .search input, .search select { flex: 1 1 200px; padding: 12px 16px; border: 0; outline: 0;
+    border-radius: 14px; background: var(--bg); color: var(--text); font: inherit; box-shadow: var(--in); }
+  .search select { flex: 0 1 180px; cursor: pointer; }
+  .search input::placeholder { color: var(--muted); }
+  button { font: inherit; cursor: pointer; border: 0; background: var(--bg); color: var(--text); }
+  .btn, .chip, .fav, .play, .card { border: 1px solid var(--edge); }
+  .btn, .chip, .fav, .play, .card { transition: box-shadow .15s, color .15s, transform .1s; }
+  .btn { padding: 12px 22px; border-radius: 14px; font-weight: 600; color: var(--accent); box-shadow: var(--out); }
+  .btn:hover, .chip:hover, .fav:hover { color: var(--accent); }
+  .btn:active { box-shadow: var(--in); transform: scale(.98); }
+  .chips { display: flex; gap: 12px; flex-wrap: wrap; margin: 22px 0 6px; }
+  .chip { padding: 8px 16px; border-radius: 999px; box-shadow: var(--out-sm); }
+  .chip:active { box-shadow: var(--in-sm); }
+  .chip.on { box-shadow: var(--in-sm); color: var(--accent); font-weight: 600; }
+  .opts { display: flex; gap: 16px; align-items: center; color: var(--muted); font-size: 13px; margin-top: 12px; flex-wrap: wrap; }
+  .opts input { accent-color: var(--accent); }
+  main { max-width: 1100px; margin: 0 auto; padding: 8px 16px; }
+  .status { color: var(--muted); margin: 8px 0 14px; min-height: 1.4em; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; }
+  .card { display: flex; gap: 12px; align-items: center; padding: 12px; background: var(--bg);
+    border-radius: 18px; box-shadow: var(--out); cursor: pointer; min-width: 0; }
+  .card:hover { transform: translateY(-1px); }
+  .card:active { box-shadow: var(--in); transform: none; }
+  .card.playing { box-shadow: var(--in); }
+  .card.playing .name { color: var(--accent); }
+  .logo { width: 48px; height: 48px; flex: none; border-radius: 12px; background: var(--bg); box-shadow: var(--in-sm);
+    display: grid; place-items: center; overflow: hidden; font-weight: 700; color: var(--muted); padding: 4px; }
+  .logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+  .info { flex: 1; min-width: 0; }
+  .name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .meta { color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fav { font-size: 17px; width: 36px; height: 36px; border-radius: 50%; padding: 0; flex: none; color: var(--muted); box-shadow: var(--out-sm); }
+  .fav:active, .fav.on { box-shadow: var(--in-sm); }
+  .fav.on { color: var(--accent); }
+  .player { position: fixed; left: 0; right: 0; bottom: 0; background: var(--bg);
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+    box-shadow: 0 -6px 14px var(--dark); }
+  .player-in { max-width: 1100px; margin: 0 auto; display: flex; gap: 16px; align-items: center; }
+  .play { width: 58px; height: 58px; border-radius: 50%; font-size: 19px; flex: none; color: var(--accent); box-shadow: var(--out); }
+  .play:active:not(:disabled), .play.on { box-shadow: var(--in); }
+  .play:disabled { color: var(--muted); cursor: default; }
+  .now { flex: 1; min-width: 0; }
+  .now .name { font-size: 16px; }
+  /* Громкость: кнопки − и +, заполненная часть дорожки акцентным цветом */
+  .volbox { display: flex; align-items: center; gap: 10px; flex: none; }
+  .vbtn { width: 34px; height: 34px; border-radius: 50%; padding: 0; font-size: 20px; line-height: 1; font-weight: 700;
+    color: var(--accent); box-shadow: var(--out-sm); border: 1px solid var(--edge); flex: none; }
+  .vbtn:active { box-shadow: var(--in-sm); }
+  .vol { -webkit-appearance: none; appearance: none; width: 130px; height: 10px; border-radius: 5px; outline: 0; margin: 0;
+    background: linear-gradient(to right, var(--accent) 0, var(--accent) var(--v, 80%), transparent var(--v, 80%));
+    box-shadow: var(--in-sm); border: 1px solid var(--edge); cursor: pointer; }
+  .vol::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%;
+    background: var(--bg); border: 3px solid var(--accent); box-shadow: var(--out-sm); cursor: pointer; }
+  .vol::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--bg);
+    border: 3px solid var(--accent); box-shadow: var(--out-sm); }
+  /* Бегущая строка в плеере: станция, страна, жанр, битрейт и (если сервер сообщает) текущая песня.
+     Текст продублирован, лента сдвигается на половину — получается бесконечный круг */
+  #nowMeta.marq { text-overflow: clip; -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
+  #nowMeta.marq .track { display: inline-block; white-space: nowrap; animation: marquee var(--dur, 16s) linear infinite; }
+  #nowMeta.marq .track span { padding-right: 3em; }
+  #nowMeta .song { color: var(--accent); font-weight: 600; }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  /* Кнопка «♥ записать трек» в плеере и записная книжка */
+  .save { width: 44px; height: 44px; border-radius: 50%; padding: 0; font-size: 20px; flex: none; color: var(--accent);
+    border: 1px solid var(--edge); box-shadow: var(--out-sm); transition: box-shadow .15s, transform .1s; }
+  .save:active:not(:disabled) { box-shadow: var(--in-sm); transform: scale(.95); }
+  .save:disabled { color: var(--muted); opacity: .5; cursor: default; }
+  .save.done { box-shadow: var(--in-sm); }
+  .notes-bar { grid-column: 1 / -1; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; color: var(--muted); font-size: 13px; }
+  .note .info .name { white-space: normal; }
+  .note .acts { display: flex; gap: 8px; flex: none; }
+  .note .acts a, .note .acts button { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; padding: 0;
+    font-size: 14px; text-decoration: none; color: var(--muted); border: 1px solid var(--edge); box-shadow: var(--out-sm); background: var(--bg); }
+  .note .acts a:hover, .note .acts button:hover { color: var(--accent); }
+  .empty { color: var(--muted); padding: 30px 0; text-align: center; grid-column: 1 / -1; }
+  /* Плашка «Открыть в браузере»: видна в пересланном файле (там скрипты не работают) и во встроенном браузере Telegram */
+  .openweb { display: block; margin: 0 0 18px; padding: 14px 16px; border-radius: 16px; background: var(--bg);
+    box-shadow: var(--out); border: 1px solid var(--edge); color: var(--text); }
+  .openweb b { display: block; font-size: 16px; margin-bottom: 4px; }
+  .openweb a.go { display: block; margin-top: 10px; padding: 12px; border-radius: 14px; text-align: center;
+    font-weight: 700; color: #fff; background: var(--accent); text-decoration: none; }
+  .openweb small { display: block; margin-top: 8px; color: var(--muted); }
+  .web .openweb { display: none; }
+  .web.tg .openweb { display: block; }
+  .openweb .tg-only { display: none; }
+  .tg .openweb .tg-only { display: block; }
+  .tg .openweb .file-only { display: none; }
+  button, .card { -webkit-tap-highlight-color: transparent; }
+  /* На телефоне громкость регулируют кнопками на корпусе — ползунок только мешает названию */
+  @media (max-width: 520px) { .volbox { display: none; } h1 { font-size: 22px; } .grid { gap: 14px; }
+    .search select { flex: 1 1 100%; } .btn { flex: 1 1 100%; } }
+</style>
+</head>
+<body>
+<div class="waves" aria-hidden="true"></div>
+<div class="antenna" aria-hidden="true"><i></i><i></i><i></i></div>
+<header>
+  <div class="openweb" id="openweb">
+    <b class="file-only">Радио работает только в браузере</b>
+    <b class="tg-only">Откройте радио в браузере</b>
+    <span class="file-only">Вы открыли файл. Нажмите кнопку — радио откроется в Safari или Chrome.</span>
+    <span class="tg-only">В Telegram звук пропадёт, как только вы свернёте приложение.</span>
+    <a class="go" id="openwebBtn" href="https://radioglob.ru/" target="_blank" rel="noopener">Открыть в браузере ↗</a>
+    <small class="tg-only">Если кнопка не сработала: нажмите ⋯ вверху справа → «Открыть в Safari» / «Открыть в браузере».</small>
+  </div>
+  <h1>РАДИО</h1>
+  <p class="sub">Тысячи станций со всего мира. Каталог: radio-browser.info
+    <button class="install" id="install" type="button" hidden>⤓ Установить как приложение</button></p>
+  <form class="search" id="form">
+    <input id="q" type="search" placeholder="Название станции или жанр…" autocomplete="off">
+    <select id="country">
+      <option value="">Все страны</option>
+      <option value="RU">Россия</option>
+      <option value="BY">Беларусь</option>
+      <option value="KZ">Казахстан</option>
+      <option value="PL">Польша</option>
+      <option value="US">США</option>
+      <option value="GB">Великобритания</option>
+      <option value="DE">Германия</option>
+      <option value="FR">Франция</option>
+      <option value="IT">Италия</option>
+    </select>
+    <button class="btn" type="submit">Найти</button>
+  </form>
+  <div class="chips" id="chips"></div>
+  <div class="opts">
+    <label><input type="checkbox" id="httpsOnly"> Только защищённые потоки (https)</label>
+  </div>
+</header>
+
+<main>
+  <div class="status" id="status">Если станции не появляются — откройте радио в Safari или Chrome по ссылке <a href="https://radioglob.ru/" target="_blank" rel="noopener">serhejprok.github.io/persona-prokopik/radio/</a></div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<div class="player">
+  <div class="player-in">
+    <button class="play" id="play" disabled title="Играть / пауза">▶</button>
+    <div class="logo" id="nowLogo">♪</div>
+    <div class="now">
+      <div class="name" id="nowName">Выберите станцию</div>
+      <div class="meta" id="nowMeta">&nbsp;</div>
+    </div>
+    <button class="save" id="save" type="button" disabled title="Записать трек в записную книжку" aria-label="Записать трек">♥</button>
+    <div class="volbox">
+      <button class="vbtn" id="volDown" title="Тише" aria-label="Тише">−</button>
+      <input class="vol" id="vol" type="range" min="0" max="1" step="0.01" value="0.8" title="Громкость" aria-label="Громкость">
+      <button class="vbtn" id="volUp" title="Громче" aria-label="Громче">+</button>
+    </div>
+  </div>
+</div>
+
+<audio id="audio" preload="none"></audio>
+
+<script>
+// Написано на старом JavaScript, чтобы сработать в любом браузере: показывает ошибку прямо на странице
+window.onerror = function (msg, src, line) {
+  if (msg === "Script error.") return; // ошибки чужих скриптов (hls.js с CDN) не показываем
+  var el = document.getElementById("status");
+  if (el) el.textContent = "Ошибка: " + msg + " (строка " + line + "). Пришлите этот текст разработчику.";
+};
+</script>
+<script>
+const SERVERS = ["https://de1.api.radio-browser.info", "https://nl1.api.radio-browser.info",
+                 "https://at1.api.radio-browser.info", "https://de2.api.radio-browser.info"];
+const PRESETS = [
+  { label: "★ Избранное", fav: true },
+  { label: "📒 Записная книжка", notes: true },
+  { label: "Популярное в России", country: "RU" },
+  { label: "Беларусь", country: "BY" },
+  { label: "Казахстан", country: "KZ" },
+  { label: "Польша", country: "PL" },
+  { label: "Поп", tag: "pop", bg: "pop" },
+  { label: "Рок", tag: "rock", bg: "rock" },
+  { label: "Джаз", tag: "jazz", bg: "jazz" },
+  { label: "Классика", tag: "classical", bg: "classical" },
+  { label: "Электроника", tag: "electronic", bg: "electronic" },
+  { label: "Ретро", tag: "oldies", bg: "retro" },
+  { label: "Lounge / Chill", tag: "chillout", bg: "chill" },
+  // «Наука» — подобранный вручную список (по тегу science в каталоге в основном старые фантастические спектакли).
+  // Проверены 17.10.2026: живые и по https. Порядок здесь = порядок на экране, русская станция первой
+  // «Фолк» — тоже вручную: по тегу folk в каталоге много случайного (KEXP, поп). Проверены 17.10.2026
+  { label: "Фолк", bg: "folk", ids: [
+    "d68e43d8-3c7b-4bb8-9f22-4bb32bd750e0",
+    "fee6751a-ad1a-4f9e-91cd-21269cc3b682",
+    "28c0dc1a-9089-4dda-bf6e-7c3a45646212",
+    "3f5d5039-5ecf-429a-ae2a-8c049ddfafb1",
+    "143b2790-3617-4f8f-a66c-c75c03068700",
+    "3aa2641c-45aa-4ee8-b1e2-1b397fac47e5",
+    "a1dbd7d6-d0c7-4479-b91e-e44b64718d65",
+    "39e5d255-c3ad-4f81-9957-a1ceb59a3488",
+    "a96e06f8-4d64-11ea-b877-52543be04c81",
+    "86d4122b-8c50-4515-8824-4f91bb7fc8de",
+    "d271f2e0-6c6f-4446-a580-642928b9cd88",
+    "b1939f76-1417-4058-8657-403e6fcf45ea",
+    "aa6ee95d-e208-4592-a121-047056106596"
+  ] },
+  { label: "Наука", bg: "science", ids: [
+    "c9773ed8-e9bd-4487-92a2-e8b1dbbaf891",
+    "3d4c97c7-e122-4304-b8c8-52336683bda1",
+    "21ab678c-ff19-4314-9969-165e15b4210d",
+    "a431bb8a-8440-4d9c-88a5-57b93c33e099",
+    "04cf4250-cc1b-4a50-98e9-886058ab3096",
+    "499e5897-8078-4580-ba41-189abef86da7",
+    "6f441919-6d3f-44ac-a249-767c552b49f0",
+    "55ba1adc-6379-448a-b529-99abec40d506",
+    "ea5901de-c1b6-4970-805e-9550e8afbbfa",
+    "bcf65bb3-a449-40c2-9159-dda8d4792b19",
+    "68f52212-e3b0-479b-9da6-962a6c5e713d",
+    "3c2da98e-b7b7-4192-8ca4-3a625a301629"
+  ] },
+  // «Обучение» — вручную: языки (английский, китайский, Морзе), история, лекции. Проверены 17.10.2026, все по https
+  { label: "Обучение", bg: "study", ids: [
+    "3fefef81-0b20-4193-9dc7-c5839f5391eb",
+    "3f537d76-6041-4200-8804-c5b9f618ab5a",
+    "fd200b5d-0137-4a87-8afc-3275da795c2a",
+    "49476d42-0ff1-4de2-b083-0c55a7231d55",
+    "eecbb174-db4f-4bb1-95a2-96fc60312f84",
+    "4540380c-8d7c-49da-b0dc-699c1fb30ebc",
+    "7c4fb276-5340-4e47-8c1c-8cacae66f98a",
+    "98137c5f-fd3b-4d5c-8e91-12752b81396d",
+    "adca3071-8636-4114-a18e-2d458054ed58",
+    "05ee93a8-e030-40a8-89a8-713890672ee5",
+    "c055fc23-49fb-42a2-a84b-992081fb4ee3",
+    "8e979832-71a9-4f4e-ace1-3e6e494a027a",
+    "140cbc06-7365-40c8-b81e-564f55e7f290",
+    "31b735e5-f940-44e2-bcbb-b0af1d34b5e5"
+  ] },
+  // «Детям» — вручную: русские станции первыми, дальше проверенные зарубежные. Проверены 17.10.2026
+  { label: "Детям", bg: "kids", ids: [
+    "464bcd7d-6be6-4ae2-9232-38dda51effc7",
+    "3f165fb8-873a-413b-8e09-ed389d9e0d18",
+    "4c91b144-6ca1-462e-ab10-070ffb56a3b8",
+    "38ba7b0a-9b14-4c05-a074-8602a59a1773",
+    "1d2fb3d8-a109-4dfd-ba6f-9951414e811b",
+    "6ebbea93-0ba5-441b-8fbc-51c586d361e3",
+    "ff871225-7731-45a1-aee0-9e8fa463dfc3",
+    "e8d66981-99a5-4149-b34e-8d4924422cb5",
+    "9e872eab-3ac9-4d55-a104-b4a59d589af3",
+    "6f49ac73-88fc-4fa0-907f-2211bd9e021f",
+    "0c1614d3-db11-447c-9da8-42107929fae6",
+    "c860e4f1-6368-4122-9515-3beae17f4c97",
+    "73c83d14-715a-47e3-bbc1-7354a8955339",
+    "02d57c4d-b7c9-4b3d-a3e8-2cdcc3b66b51"
+  ] },
+  { label: "Новости", tag: "news" },
+];
+
+const $ = id => document.getElementById(id);
+const audio = $("audio");
+let hls = null, current = null, lastList = [], lastListRaw = [];
+
+function store(key, val) {
+  try {
+    if (val === undefined) return JSON.parse(localStorage.getItem(key));
+    localStorage.setItem(key, JSON.stringify(val));
+  } catch (e) { return null; }
+}
+let favs = store("radio.favs") || [];
+// Во встроенном браузере Telegram кнопка ведёт во внешний браузер:
+// на айфоне — схема x-safari-https (iOS 17+), на Android — intent, который откроет браузер по умолчанию
+if (/\btg\b/.test(document.documentElement.className)) {
+  const site = "radioglob.ru/";
+  const ua = navigator.userAgent;
+  if (/iPhone|iPad|iPod/.test(ua)) $("openwebBtn").href = "x-safari-https://" + site;
+  else if (/Android/.test(ua)) $("openwebBtn").href = "intent://" + site + "#Intent;scheme=https;S.browser_fallback_url=https%3A%2F%2F" + encodeURIComponent(site) + ";end";
+  $("openwebBtn").textContent = /iPhone|iPad|iPod/.test(ua) ? "Открыть в Safari ↗" : "Открыть в браузере ↗";
+}
+// На https-сайте (GitHub Pages) браузер не пускает http-потоки, поэтому там показываем только защищённые
+if (location.protocol === "https:") {
+  $("httpsOnly").checked = true;
+  document.querySelector(".opts").hidden = true;
+} else {
+  $("httpsOnly").checked = store("radio.httpsOnly") === true;
+}
+function setVol(v) {
+  v = Math.min(1, Math.max(0, Math.round(v * 100) / 100));
+  audio.volume = v;
+  $("vol").value = v;
+  $("vol").style.setProperty("--v", (v * 100) + "%"); // заливка дорожки до бегунка
+  store("radio.vol", v);
+}
+const savedVol = store("radio.vol");
+setVol((typeof savedVol === "number") ? savedVol : 0.8);
+
+async function api(path) {
+  let lastErr;
+  for (const s of SERVERS) {
+    try {
+      const r = await fetch(s + path);
+      if (r.ok) return await r.json();
+    } catch (e) { lastErr = e; }
+  }
+  throw lastErr || new Error("Каталог недоступен");
+}
+
+// Подборка из конкретных станций по их номерам в каталоге, в заданном порядке
+async function loadIds(ids) {
+  $("status").textContent = "Загружаю станции…";
+  $("grid").innerHTML = "";
+  try {
+    let list = await api("/json/stations/byuuid?uuids=" + ids.join(","));
+    list.sort((a, b) => ids.indexOf(a.stationuuid) - ids.indexOf(b.stationuuid));
+    // Станции Украины не показываем
+    list = list.filter(s => s.countrycode !== "UA");
+    render(list);
+  } catch (e) {
+    $("status").textContent = "Не удалось загрузить каталог. Проверьте интернет и попробуйте ещё раз.";
+  }
+}
+
+async function search({ name = "", tag = "", country = "" } = {}) {
+  const p = new URLSearchParams({ limit: 120, hidebroken: "true", order: "clickcount", reverse: "true" });
+  if (name) p.set("name", name);
+  if (tag) p.set("tag", tag);
+  if (country) p.set("countrycode", country);
+  $("status").textContent = "Загружаю станции…";
+  $("grid").innerHTML = "";
+  try {
+    let list = await api("/json/stations/search?" + p);
+    // Если по названию ничего — пробуем как жанр
+    if (!list.length && name && !tag) {
+      p.delete("name"); p.set("tag", name.toLowerCase());
+      list = await api("/json/stations/search?" + p);
+    }
+    // Станции Украины не показываем
+    list = list.filter(s => s.countrycode !== "UA");
+    render(list);
+  } catch (e) {
+    $("status").textContent = "Не удалось загрузить каталог. Проверьте интернет и попробуйте ещё раз.";
+  }
+}
+
+function render(list) {
+  lastListRaw = list;
+  const httpsOnly = $("httpsOnly").checked;
+  // Одна станция часто лежит в каталоге несколько раз — оставляем одну, предпочитая поток по https
+  // Все адреса одной станции собираем в s.urls: если первый не отвечает, плеер пробует следующие.
+  // «Radio RMF FM» и «RMF FM» считаем одной станцией.
+  const isSecure = st => st.url_resolved.startsWith("https:");
+  const groups = new Map();
+  for (const s of list) {
+    if (!s.url_resolved) continue;
+    if (httpsOnly && !isSecure(s)) continue;
+    const key = s.name.trim().toLowerCase().replace(/^(radio|радио)\s+/, "").replace(/[^a-zа-яё0-9]/g, "")
+      || s.name.trim().toLowerCase();
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(s);
+  }
+  lastList = [];
+  groups.forEach(g => {
+    const sorted = g.filter(isSecure).concat(g.filter(st => !isSecure(st))); // https вперёд, иначе по популярности
+    const main = sorted[0];
+    main.urls = sorted.map(st => st.url_resolved).filter((u, i, a) => a.indexOf(u) === i);
+    if (!main.favicon) { const withLogo = g.find(st => st.favicon); if (withLogo) main.favicon = withLogo.favicon; }
+    lastList.push(main);
+  });
+  $("status").textContent = lastList.length ? `Найдено станций: ${lastList.length}` : "";
+  const grid = $("grid");
+  grid.innerHTML = "";
+  if (!lastList.length) {
+    grid.innerHTML = '<div class="empty">Ничего не найдено. Попробуйте другой запрос или снимите галочку «только https».</div>';
+    return;
+  }
+  for (const s of lastList) grid.appendChild(card(s));
+}
+
+function logoEl(s) {
+  const d = document.createElement("div");
+  d.className = "logo";
+  d.textContent = (s.name.trim()[0] || "♪").toUpperCase();
+  // Пробуем по очереди: логотип из каталога → он же по https → значок официального сайта станции.
+  // Если ничего не загрузилось (или картинка-заглушка меньше 24px) — остаётся первая буква.
+  const sources = logoSources(s);
+  const tryNext = () => {
+    const src = sources.shift();
+    if (!src) return;
+    const img = new Image();
+    let done = false;
+    const next = () => { if (!done) { done = true; img.src = ""; tryNext(); } };
+    const timer = setTimeout(next, 4000); // некоторые сервера не отвечают — не ждём их вечно
+    img.referrerPolicy = "no-referrer";
+    img.onload = () => {
+      if (done) return;
+      if (img.naturalWidth < 24) return next();
+      done = true; clearTimeout(timer);
+      d.textContent = ""; d.appendChild(img);
+    };
+    img.onerror = () => { clearTimeout(timer); next(); };
+    img.src = src;
+  };
+  tryNext();
+  return d;
+}
+
+function logoSources(s) {
+  const list = [];
+  const fav = (s.favicon || "").trim();
+  if (fav) {
+    list.push(fav);
+    if (fav.startsWith("http:")) list.push("https:" + fav.slice(5));
+  }
+  try {
+    const host = new URL(s.homepage).hostname;
+    if (host) {
+      list.push(`https://www.google.com/s2/favicons?domain=${host}&sz=128`);
+      list.push(`https://icons.duckduckgo.com/ip3/${host}.ico`);
+    }
+  } catch (e) {}
+  return list;
+}
+
+function metaText(s) {
+  const tags = (s.tags || "").split(",").filter(Boolean).slice(0, 3).join(", ");
+  return [s.country, tags, s.bitrate ? s.bitrate + " kbps" : ""].filter(Boolean).join(" · ");
+}
+
+function card(s) {
+  const c = document.createElement("div");
+  c.className = "card" + ((current && current.stationuuid) === s.stationuuid ? " playing" : "");
+  c.dataset.id = s.stationuuid;
+  c.appendChild(logoEl(s));
+  const info = document.createElement("div");
+  info.className = "info";
+  info.innerHTML = '<div class="name"></div><div class="meta"></div>';
+  info.firstChild.textContent = s.name.trim();
+  info.lastChild.textContent = metaText(s);
+  c.appendChild(info);
+  const f = document.createElement("button");
+  const isFav = () => favs.some(x => x.stationuuid === s.stationuuid);
+  f.className = "fav" + (isFav() ? " on" : "");
+  f.textContent = isFav() ? "★" : "☆";
+  f.title = "В избранное";
+  f.onclick = e => {
+    e.stopPropagation();
+    favs = isFav() ? favs.filter(x => x.stationuuid !== s.stationuuid) : [...favs, s];
+    store("radio.favs", favs);
+    f.className = "fav" + (isFav() ? " on" : "");
+    f.textContent = isFav() ? "★" : "☆";
+  };
+  c.appendChild(f);
+  c.onclick = () => playStation(s);
+  return c;
+}
+
+function markPlaying() {
+  document.querySelectorAll(".card").forEach(c =>
+    c.classList.toggle("playing", c.dataset.id === (current && current.stationuuid)));
+}
+
+function playStation(s) {
+  current = s;
+  store("radio.last", s);
+  $("nowName").textContent = s.name.trim();
+  setMarquee("Подключаюсь…");
+  $("nowLogo").replaceWith(Object.assign(logoEl(s), { id: "nowLogo" }));
+  $("play").disabled = false;
+  markPlaying();
+  setMediaSession(s);
+
+  urlIndex = 0;
+  nowSong = "";
+  connect();
+  fetch(SERVERS[0] + "/json/url/" + s.stationuuid).catch(() => {}); // учёт прослушивания в каталоге
+}
+
+// Подключение к текущему адресу станции. Если за 10 секунд звук не пошёл или пришла ошибка —
+// пробуем следующий адрес той же станции, и только когда адреса кончились, пишем «не отвечает».
+let urlIndex = 0, connectTimer = null;
+function connect() {
+  const urls = current.urls || [current.url_resolved];
+  const url = urls[urlIndex];
+  clearTimeout(connectTimer);
+  if (hls) { hls.destroy(); hls = null; }
+  const isHls = /\.m3u8(\?|$)/i.test(url) || (current.hls == 1);
+  if (isHls && window.Hls && Hls.isSupported()) {
+    hls = new Hls();
+    hls.loadSource(url);
+    hls.attachMedia(audio);
+    hls.on(Hls.Events.ERROR, (_, d) => { if (d.fatal) nextUrl(); });
+  } else {
+    audio.src = url;
+  }
+  audio.play().catch(err => { if (err.name !== "AbortError") nextUrl(); });
+  connectTimer = setTimeout(nextUrl, 10000);
+}
+function nextUrl() {
+  clearTimeout(connectTimer);
+  const urls = current.urls || [current.url_resolved];
+  if (urlIndex + 1 < urls.length) {
+    urlIndex++;
+    setMarquee("Пробую другой адрес станции…");
+    connect();
+  } else {
+    if (hls) { hls.destroy(); hls = null; }
+    audio.removeAttribute("src"); audio.load();
+    failed();
+  }
+}
+
+// Бегущая строка: что за станция и что играет. Название песни берём из открытых сервисов
+// вещательных платформ (SomaFM, radio.co, AzuraCast, RadioKing) или у сервера Icecast (status-json.xsl).
+// Если станция ничего не сообщает — в строке только станция, страна, жанр и битрейт.
+let nowSong = "", songTimer = null, userPaused = false;
+function setMarquee(note) {
+  const el = $("nowMeta");
+  const parts = [current.name.trim(), current.country, (current.tags || "").split(",").filter(Boolean).slice(0, 3).join(", "),
+    current.bitrate ? current.bitrate + " kbps" : ""].filter(Boolean);
+  el.className = "meta marq";
+  el.innerHTML = '<span class="track"><span></span><span></span></span>';
+  el.querySelectorAll(".track > span").forEach(sp => {
+    if (nowSong) {
+      const b = document.createElement("b"); b.className = "song"; b.textContent = "♪ " + nowSong;
+      sp.appendChild(b); sp.appendChild(document.createTextNode(" · "));
+    }
+    sp.appendChild(document.createTextNode((note ? note + " · " : "В эфире: ") + parts.join(" · ")));
+  });
+  const len = el.querySelector(".track > span").textContent.length;
+  el.style.setProperty("--dur", Math.max(10, Math.round(len * 0.28)) + "s"); // скорость одинаковая при любой длине
+  const name = current.name.trim();
+  if (note) setTitleMarquee("", "⏳ " + name);
+  else setTitleMarquee(nowSong ? "♪ " + nowSong + " · " + name : name + (current.country ? " · " + current.country : ""));
+}
+function stopMarquee(text) {
+  const el = $("nowMeta");
+  el.className = "meta";
+  el.textContent = text;
+  setTitleMarquee("", "РАДИО");
+}
+// Та же бегущая строка в заголовке вкладки — её видно на кнопке окна в панели задач и при наведении на неё.
+// В свёрнутом окне браузер крутит таймер не чаще раза в секунду — строка бежит медленнее, это нормально
+let titleChars = [], titlePos = 0, titleTimer = null;
+function setTitleMarquee(text, still) {
+  clearInterval(titleTimer);
+  if (!text) { document.title = still || "РАДИО"; return; }
+  titleChars = Array.from(text + "   •   "); // Array.from — чтобы не разрезать эмодзи пополам
+  titlePos = 0;
+  const tick = () => {
+    document.title = "▶ " + titleChars.slice(titlePos).join("") + titleChars.slice(0, titlePos).join("");
+    titlePos = (titlePos + 1) % titleChars.length;
+  };
+  tick();
+  titleTimer = setInterval(tick, 350);
+}
+// Откуда узнать текущую песню для адреса потока: [адрес запроса, функция, достающая «исполнитель — песня»]
+function songSource(u) {
+  const both = (artist, title) => [artist, title].filter(Boolean).join(" — ");
+  let m;
+  if (/(^|\.)somafm\.com$/.test(u.hostname) && (m = u.pathname.match(/^\/([a-z0-9]+?)(-\d+-\w+)?$/i)))
+    return ["https://somafm.com/songs/" + m[1] + ".json", d => d.songs && d.songs[0] && both(d.songs[0].artist, d.songs[0].title)];
+  if (/\.radio\.co$/.test(u.hostname) && (m = u.pathname.match(/^\/(\w+)\//)))
+    return ["https://public.radio.co/stations/" + m[1] + "/status", d => d.current_track && d.current_track.title];
+  if ((m = u.pathname.match(/^\/listen\/([^\/]+)\//)))
+    return [u.origin + "/api/nowplaying_static/" + m[1] + ".json", d => d.now_playing && d.now_playing.song && (d.now_playing.song.text || both(d.now_playing.song.artist, d.now_playing.song.title))];
+  if (/radioking\.(io|com)$/.test(u.hostname) && (m = u.pathname.match(/^\/([\w-]+)$/)))
+    return ["https://api.radioking.io/widget/radio/" + m[1] + "/track/current", d => both(d.artist, d.title)];
+  return [u.origin + "/status-json.xsl", d => {
+    let src = d.icestats && d.icestats.source;
+    if (!src) return "";
+    if (!Array.isArray(src)) src = [src];
+    const mine = src.find(x => x.listenurl && x.listenurl.split("?")[0].endsWith(u.pathname)) || (src.length === 1 ? src[0] : null);
+    return mine && (mine.artist ? both(mine.artist, mine.title) : mine.title);
+  }];
+}
+function watchSong() {
+  clearInterval(songTimer);
+  const url = (current.urls || [current.url_resolved])[urlIndex] || "";
+  let u;
+  try { u = new URL(url); } catch (e) { return; }
+  if (/\.m3u8/i.test(u.pathname)) return;
+  const src = songSource(u);
+  const ask = () => {
+    const ctrl = window.AbortController ? new AbortController() : null;
+    const t = setTimeout(() => ctrl && ctrl.abort(), 5000);
+    fetch(src[0], ctrl ? { signal: ctrl.signal } : {})
+      .then(r => r.json())
+      .then(d => {
+        clearTimeout(t);
+        const title = String(src[1](d) || "").trim();
+        if (title && title !== nowSong && !audio.paused) { nowSong = title; setMarquee(); updateSessionTitle(); }
+      })
+      .catch(() => { clearTimeout(t); clearInterval(songTimer); }); // сервис не отвечает — больше не спрашиваем
+  };
+  ask();
+  songTimer = setInterval(ask, 20000);
+}
+function updateSessionTitle() {
+  if (!("mediaSession" in navigator) || !navigator.mediaSession.metadata) return;
+  navigator.mediaSession.metadata.title = nowSong || current.name.trim();
+  navigator.mediaSession.metadata.artist = nowSong ? current.name.trim() : "РАДИО";
+}
+
+// Название и логотип на экране блокировки телефона, кнопки пауза/играть в шторке
+function setMediaSession(s) {
+  if (!("mediaSession" in navigator)) return;
+  const art = logoSources(s).slice(0, 1).map(src => ({ src, sizes: "512x512" }));
+  navigator.mediaSession.metadata = new MediaMetadata({ title: s.name.trim(), artist: "РАДИО", artwork: art });
+  navigator.mediaSession.setActionHandler("play", () => playStation(current));
+  navigator.mediaSession.setActionHandler("pause", () => audio.pause());
+}
+
+function failed() {
+  document.documentElement.classList.remove("on-air");
+  stopMarquee("Станция сейчас не отвечает — выберите другую");
+  $("play").textContent = "▶";
+  $("play").classList.remove("on");
+}
+
+audio.addEventListener("playing", () => { clearTimeout(connectTimer); $("play").textContent = "❚❚"; $("play").classList.add("on"); document.documentElement.classList.add("on-air"); $("save").disabled = false; setMarquee(); watchSong(); });
+audio.addEventListener("pause", () => { $("play").textContent = "▶"; $("play").classList.remove("on"); document.documentElement.classList.remove("on-air"); $("save").disabled = true; clearInterval(songTimer);
+  if (userPaused) { userPaused = false; stopMarquee("Пауза — нажмите ▶"); } });
+audio.addEventListener("waiting", () => { setMarquee("Буферизация…"); });
+audio.addEventListener("error", () => { if (audio.getAttribute("src") && current) nextUrl(); });
+
+// Записная книжка: кнопка ♥ запоминает, что сейчас играет (песня, станция, время). Хранится в этом браузере.
+// Если станция не сообщает песню — спрашиваем название, чтобы запись не была пустой
+let notes = store("radio.notes") || [];
+const pad = n => (n < 10 ? "0" : "") + n;
+function noteTime(t) {
+  const d = new Date(t);
+  return pad(d.getDate()) + "." + pad(d.getMonth() + 1) + "." + d.getFullYear() + " " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+}
+function notesOpen() { const i = PRESETS.findIndex(p => p.notes); const c = document.querySelectorAll(".chip")[i]; return c && c.classList.contains("on"); }
+$("save").onclick = () => {
+  if (!current) return;
+  let song = nowSong;
+  if (!song) {
+    song = window.prompt("Станция не сообщает название песни. Впишите, что играет (или оставьте пустым — запишется станция и время):", "");
+    if (song === null) return; // нажали «Отмена»
+    song = song.trim();
+  }
+  const name = current.name.trim();
+  if (notes[0] && notes[0].song === song && notes[0].station === name && song) {
+    $("status").textContent = "Этот трек уже записан в книжку.";
+  } else {
+    notes.unshift({ song: song, station: name, time: Date.now(), s: current });
+    notes = notes.slice(0, 500);
+    store("radio.notes", notes);
+    $("status").textContent = "Записано в книжку: " + (song || name) + (song ? " (" + name + ")" : "");
+  }
+  $("save").classList.add("done");
+  setTimeout(() => $("save").classList.remove("done"), 600);
+  if (notesOpen()) renderNotes();
+};
+function renderNotes() {
+  const grid = $("grid");
+  grid.innerHTML = "";
+  $("status").textContent = notes.length ? "Записано треков: " + notes.length : "";
+  if (!notes.length) {
+    grid.innerHTML = '<div class="empty">Пока пусто. Когда играет песня, нажмите ♥ в плеере внизу — она запишется сюда.</div>';
+    return;
+  }
+  const bar = document.createElement("div");
+  bar.className = "notes-bar";
+  bar.textContent = "Книжка хранится в радио на этом устройстве — на телефоне и компьютере она своя.";
+  grid.appendChild(bar);
+  notes.forEach((n, i) => {
+    const c = document.createElement("div");
+    c.className = "card note";
+    c.appendChild(logoEl(n.s));
+    const info = document.createElement("div");
+    info.className = "info";
+    info.innerHTML = '<div class="name"></div><div class="meta"></div>';
+    info.firstChild.textContent = n.song ? "♪ " + n.song : n.station;
+    info.lastChild.textContent = (n.song ? n.station + " · " : "") + noteTime(n.time);
+    c.appendChild(info);
+    const acts = document.createElement("div");
+    acts.className = "acts";
+    const q = encodeURIComponent(n.song || n.station);
+    acts.innerHTML = '<button type="button" title="Включить станцию">▶</button>' +
+      (n.song ? '<a target="_blank" rel="noopener" title="Найти на YouTube" href="https://www.youtube.com/results?search_query=' + q + '">YT</a>' +
+                '<a target="_blank" rel="noopener" title="Найти в Яндекс Музыке" href="https://music.yandex.ru/search?text=' + q + '">Я</a>' : "") +
+      '<button type="button" title="Удалить из книжки">✕</button>';
+    acts.firstChild.onclick = () => playStation(n.s);
+    acts.lastChild.onclick = () => { notes.splice(i, 1); store("radio.notes", notes); renderNotes(); };
+    c.appendChild(acts);
+    grid.appendChild(c);
+  });
+}
+
+// Кнопка «Установить как приложение»: Edge/Chrome на компьютере и Android сами предлагают установку,
+// мы только показываем кнопку, когда браузер готов. Установленное радио — своё окно и своя иконка в панели задач
+let installPrompt = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installPrompt = e; $("install").hidden = false; });
+window.addEventListener("appinstalled", () => { installPrompt = null; $("install").hidden = true; });
+$("install").onclick = () => {
+  if (!installPrompt) return;
+  installPrompt.prompt();
+  installPrompt.userChoice.then(() => { installPrompt = null; $("install").hidden = true; });
+};
+
+$("play").onclick = () => {
+  if (!current) return;
+  if (audio.paused) {
+    // Для живого эфира переподключаемся, чтобы не играть «из прошлого»
+    playStation(current);
+  } else {
+    clearTimeout(connectTimer);
+    userPaused = true; // паузу нажал человек, а не браузер при смене станции
+    audio.pause();
+  }
+};
+$("vol").oninput = e => setVol(+e.target.value);
+$("volDown").onclick = () => setVol(audio.volume - 0.1);
+$("volUp").onclick = () => setVol(audio.volume + 0.1);
+$("httpsOnly").onchange = e => { store("radio.httpsOnly", e.target.checked); render(lastListRaw); };
+
+function setChip(i) {
+  document.querySelectorAll(".chip").forEach((c, j) => c.classList.toggle("on", j === i));
+  setStyleBg(i >= 0 && PRESETS[i].bg);
+}
+
+// Фон под стиль музыки: плавно гасим слой, меняем узор, проявляем. Страны, избранное, поиск — обычные радиоволны
+let bgTimer = null;
+function setStyleBg(name) {
+  const root = document.documentElement;
+  if ((root.getAttribute("data-style") || "") === (name || "")) return;
+  const waves = document.querySelector(".waves");
+  waves.classList.add("fade");
+  clearTimeout(bgTimer);
+  bgTimer = setTimeout(() => {
+    if (name) root.setAttribute("data-style", name); else root.removeAttribute("data-style");
+    waves.classList.remove("fade");
+  }, 300);
+}
+
+PRESETS.forEach((p, i) => {
+  const b = document.createElement("button");
+  b.className = "chip";
+  b.textContent = p.label;
+  b.onclick = () => {
+    setChip(i);
+    $("q").value = ""; $("country").value = p.country || "";
+    if (p.ids) {
+      loadIds(p.ids);
+    } else if (p.notes) {
+      renderNotes();
+    } else if (p.fav) {
+      render(favs);
+      if (!favs.length) $("grid").innerHTML = '<div class="empty">Пока пусто. Нажмите ☆ у станции, чтобы добавить её сюда.</div>';
+    } else {
+      search({ tag: p.tag, country: p.country });
+    }
+  };
+  $("chips").appendChild(b);
+});
+
+$("form").onsubmit = e => {
+  e.preventDefault();
+  setChip(-1);
+  search({ name: $("q").value.trim(), country: $("country").value });
+};
+
+// Старт: последняя станция в плеере + популярное в России
+const last = store("radio.last");
+if (last) {
+  current = last;
+  $("nowName").textContent = last.name.trim();
+  stopMarquee("Нажмите ▶, чтобы продолжить");
+  $("nowLogo").replaceWith(Object.assign(logoEl(last), { id: "nowLogo" }));
+  $("play").disabled = false;
+}
+setChip(PRESETS.findIndex(p => p.country === "RU" && !p.tag));
+search({ country: "RU" });
+</script>
+</body>
+</html>
