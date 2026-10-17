@@ -425,7 +425,48 @@ const PRESETS = [
   { label: "Популярное в России", country: "RU" },
   { label: "Беларусь", country: "BY" },
   { label: "Казахстан", country: "KZ" },
+  // «Африка» и «Индия» — вручную: самые слушаемые станции, проверены 17.10.2026 (https, нет в реестре блокировок РКН)
+  { label: "Африка", ids: [
+    "a3c93ca9-9891-4249-a805-d622dadeed21", // Cool FM, Лагос (Нигерия)
+    "1dfcc339-6292-4bf1-8b21-5c4a099ecd7e", // Wazobia FM, Лагос (Нигерия)
+    "ac15c045-6f16-4021-b35c-00b265b7201d", // Kameme FM (Кения)
+    "cd6d66e4-adc0-4284-9392-f1a1f87091d9", // KFM 94.5 (ЮАР)
+    "9614225b-0601-11e8-ae97-52543be04c81", // Jacaranda FM (ЮАР)
+    "5a23e61f-3313-469d-9346-b07b63ca5b2b", // Hit Radio (Марокко)
+    "ea78e3db-26bd-4ffd-b236-94f69ad2d59d", // Mosaique FM (Тунис)
+    "6127891e-b89d-4424-9e3f-7723b875465e", // East Africa Radio (Танзания)
+    "056d990a-7b48-4e95-b91e-ce59ca2701e8", // Galaxy FM (Уганда)
+    "351eaaf0-2d2a-446b-8288-9f850588ba47"  // Top Congo FM (Конго)
+  ] },
+  { label: "Индия", ids: [
+    "cdd3b5a0-47f6-46d5-8209-b78e8b10ff6e", // Radio Mirchi Hindi
+    "6b36ba4f-6d29-4272-b3c0-9aeeb64e61ec", // Mirchi Top 20
+    "0e5dfcc8-99e2-4fed-a232-7f4bf23ba3c3", // Mirchi Love
+    "902ea231-d537-4dc8-8708-6819418086d0", // Vividh Bharati
+    "e928bf7b-7de2-4447-87ec-369d1be1b9f5", // Bollywood Gaane Purane
+    "7dd71b85-139b-4362-81b1-4206133a517c", // Hindi Gold Radio
+    "7b130d03-6142-4de2-85db-a821b5949468", // Lata Mangeshkar Radio
+    "baae978e-a9d0-422c-8ad4-ec803da4ef8c", // Radio Bollywood 90s
+    "9ae30654-b1a6-4eff-81f3-6400d105b340", // Rafi Hit Songs
+    "33fcdf94-5605-49bb-8e34-206f38c335dc"  // Goldy Evergreen
+  ] },
   { label: "Поп", tag: "pop", bg: "pop" },
+  // «K-pop» — вручную, без украинских станций. Проверены 17.10.2026: https, нет в реестре блокировок РКН
+  { label: "K-pop", bg: "pop", ids: [
+    "5144690c-8201-4394-83a4-06243ee848c3", // Europa Plus K-Pop
+    "57b61666-0387-4732-a99b-0609dc1d36f6", // DFM K-POP
+    "2e53ff8e-1d21-4e04-b0e9-f68257c4e7e9", // Only Hits K-Pop (США)
+    "7078d270-62b8-49c3-a729-ad325d60d29c", // SBS PopAsia (Австралия)
+    "517d1b65-91f6-47be-9832-25862f6e0d7e", // 0N K-Pop (Германия)
+    "4548080b-3497-46dc-a72b-55c136b16f06", // RauteMusik K-POP (Германия)
+    "721b8f32-8071-4cca-a10f-c999d3b65346", // Exclusively BTS
+    "15d5f6f4-e88f-4d5b-bbb7-7a72b2c9611d", // World Music Radio K-Pop
+    "87b2d880-4792-4fe6-a5c4-4aba7bc79040", // City K-Pop (Болгария)
+    "1d8fc4b6-faa9-40b3-a3c8-a025da238c65", // I Love K-POP
+    "309188ac-865c-4a4a-a1cc-982092a8fc09", // Kpophits
+    "168b79d5-be7b-436f-b144-759696655d6d", // HIT FM K-Pop Hits (Молдова)
+    "2973ff08-fb80-4281-8b7a-33bd213b06d4"  // Juka Radio K-pop
+  ] },
   { label: "Рок", tag: "rock", bg: "rock" },
   { label: "Джаз", tag: "jazz", bg: "jazz" },
   { label: "Классика", tag: "classical", bg: "classical" },
