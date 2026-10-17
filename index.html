@@ -328,6 +328,7 @@
       <option value="BY">Беларусь</option>
       <option value="KZ">Казахстан</option>
       <option value="PL">Польша</option>
+      <option value="latam">Латинская Америка</option>
       <option value="US">США</option>
       <option value="GB">Великобритания</option>
       <option value="DE">Германия</option>
@@ -377,15 +378,10 @@ window.onerror = function (msg, src, line) {
 <script>
 const SERVERS = ["https://de1.api.radio-browser.info", "https://nl1.api.radio-browser.info",
                  "https://at1.api.radio-browser.info", "https://de2.api.radio-browser.info"];
-const PRESETS = [
-  { label: "★ Избранное", fav: true },
-  { label: "📒 Записная книжка", notes: true },
-  { label: "Популярное в России", country: "RU" },
-  { label: "Беларусь", country: "BY" },
-  { label: "Казахстан", country: "KZ" },
-  // «Латинская Америка» и «Прибалтика» — вручную: самые популярные станции региона в каталоге.
-  // Проверены 17.10.2026: живые и по https. Порядок здесь = порядок на экране
-  { label: "Латинская Америка", ids: [
+// Регионы в выпадающем списке стран: вместо кода страны — ручной список станций (порядок = порядок на экране).
+// «Латинская Америка» — самые популярные станции региона в каталоге. Проверены 17.10.2026: живые и по https
+const REGIONS = {
+  latam: [
     "570cc99a-9159-4d91-9a8f-96ddb5b30797", // Rádio Antena 1 94.7 FM (Бразилия)
     "901c92bd-a757-449a-b8ce-652b079fd38a", // Rádio Mix 106.3 FM (Бразилия)
     "7b03996e-6ea0-4db5-8168-ddd1463faec2", // La 100 99.9 FM (Аргентина)
@@ -403,7 +399,17 @@ const PRESETS = [
     "00bc4f1d-050c-49ae-bc42-a8aaa5d0ff5b", // Sertaneja 106.7 (Бразилия)
     "320f8ba3-2d7b-422c-af88-09b0b526eca5", // RPP Noticias (Перу)
     "b2aa99d2-e1f7-4c4a-bd77-74f256463b86"  // BioBio (Чили)
-  ] },
+  ]
+};
+
+const PRESETS = [
+  { label: "★ Избранное", fav: true },
+  { label: "📒 Записная книжка", notes: true },
+  { label: "Популярное в России", country: "RU" },
+  { label: "Беларусь", country: "BY" },
+  { label: "Казахстан", country: "KZ" },
+  // «Прибалтика» — вручную: самые популярные станции региона в каталоге.
+  // Проверены 17.10.2026: живые и по https. Порядок здесь = порядок на экране
   { label: "Прибалтика", ids: [
     "311716b6-a375-4342-81da-3ae2c6fca8ad", // Relax FM Lietuva
     "fd57ae03-5547-4d41-9540-33059a7a42c5", // Nordic Chillout Radio (Латвия)
@@ -1038,7 +1044,9 @@ PRESETS.forEach((p, i) => {
 $("form").onsubmit = e => {
   e.preventDefault();
   setChip(-1);
-  search({ name: $("q").value.trim(), country: $("country").value });
+  const c = $("country").value;
+  if (REGIONS[c]) loadIds(REGIONS[c]);
+  else search({ name: $("q").value.trim(), country: c });
 };
 
 // Старт: последняя станция в плеере + популярное в России
