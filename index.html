@@ -329,6 +329,7 @@
       <option value="KZ">Казахстан</option>
       <option value="PL">Польша</option>
       <option value="latam">Латинская Америка</option>
+      <option value="baltic">Прибалтика</option>
       <option value="US">США</option>
       <option value="GB">Великобритания</option>
       <option value="DE">Германия</option>
@@ -399,18 +400,9 @@ const REGIONS = {
     "00bc4f1d-050c-49ae-bc42-a8aaa5d0ff5b", // Sertaneja 106.7 (Бразилия)
     "320f8ba3-2d7b-422c-af88-09b0b526eca5", // RPP Noticias (Перу)
     "b2aa99d2-e1f7-4c4a-bd77-74f256463b86"  // BioBio (Чили)
-  ]
-};
-
-const PRESETS = [
-  { label: "★ Избранное", fav: true },
-  { label: "📒 Записная книжка", notes: true },
-  { label: "Популярное в России", country: "RU" },
-  { label: "Беларусь", country: "BY" },
-  { label: "Казахстан", country: "KZ" },
-  // «Прибалтика» — вручную: самые популярные станции региона в каталоге.
-  // Проверены 17.10.2026: живые и по https. Порядок здесь = порядок на экране
-  { label: "Прибалтика", ids: [
+  ],
+  // «Прибалтика» — Литва, Латвия, Эстония: самые популярные станции в каталоге. Проверены 17.10.2026
+  baltic: [
     "311716b6-a375-4342-81da-3ae2c6fca8ad", // Relax FM Lietuva
     "fd57ae03-5547-4d41-9540-33059a7a42c5", // Nordic Chillout Radio (Латвия)
     "ee662a9d-fa14-4d70-8d1d-b101ed6da89f", // ZipFM (Литва)
@@ -424,7 +416,15 @@ const PRESETS = [
     "b56671bc-2a27-40a2-84ac-5c474217ca8c", // Radiocentras (Литва)
     "a2624589-8279-4be3-9ea0-514dcd29cef8", // Võmba FM (Эстония)
     "00f8e948-44c2-43e6-af1b-b9a66ef5bcdf"  // Радио Лента (Литва)
-  ] },
+  ]
+};
+
+const PRESETS = [
+  { label: "★ Избранное", fav: true },
+  { label: "📒 Записная книжка", notes: true },
+  { label: "Популярное в России", country: "RU" },
+  { label: "Беларусь", country: "BY" },
+  { label: "Казахстан", country: "KZ" },
   { label: "Поп", tag: "pop", bg: "pop" },
   { label: "Рок", tag: "rock", bg: "rock" },
   { label: "Джаз", tag: "jazz", bg: "jazz" },
