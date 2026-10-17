@@ -206,6 +206,13 @@
   header { max-width: 1100px; margin: 0 auto; padding: 28px 16px 8px; }
   h1 { margin: 0 0 4px; font-size: 44px; line-height: 1; font-weight: 900; letter-spacing: .08em; text-shadow: 1px 1px 1px var(--light), -1px -1px 1px var(--dark); }
   .sub { color: var(--muted); margin: 0 0 20px; }
+  /* Переключатель языка RU / EN рядом с заголовком */
+  .top { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin: 0 0 4px; }
+  .top h1 { margin: 0; }
+  .langs { display: flex; gap: 8px; }
+  .lang { padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--muted);
+    border: 1px solid var(--edge); box-shadow: var(--out-sm); }
+  .lang.on { box-shadow: var(--in-sm); color: var(--accent); }
   .install { margin-left: 8px; padding: 4px 12px; border-radius: 999px; font-size: 13px; color: var(--accent);
     border: 1px solid var(--edge); box-shadow: var(--out-sm); }
   .install:active { box-shadow: var(--in-sm); }
@@ -310,58 +317,64 @@
 <div class="antenna" aria-hidden="true"><i></i><i></i><i></i></div>
 <header>
   <div class="openweb" id="openweb">
-    <b class="file-only">Радио работает только в браузере</b>
-    <b class="tg-only">Откройте радио в браузере</b>
-    <span class="file-only">Вы открыли файл. Нажмите кнопку — радио откроется в Safari или Chrome.</span>
-    <span class="tg-only">В Telegram звук пропадёт, как только вы свернёте приложение.</span>
-    <a class="go" id="openwebBtn" href="https://radioglob.ru/" target="_blank" rel="noopener">Открыть в браузере ↗</a>
-    <small class="tg-only">Если кнопка не сработала: нажмите ⋯ вверху справа → «Открыть в Safari» / «Открыть в браузере».</small>
+    <b class="file-only" data-i18n="fileTitle">Радио работает только в браузере</b>
+    <b class="tg-only" data-i18n="tgTitle">Откройте радио в браузере</b>
+    <span class="file-only" data-i18n="fileText">Вы открыли файл. Нажмите кнопку — радио откроется в Safari или Chrome.</span>
+    <span class="tg-only" data-i18n="tgText">В Telegram звук пропадёт, как только вы свернёте приложение.</span>
+    <a class="go" id="openwebBtn" href="https://radioglob.ru/" target="_blank" rel="noopener" data-i18n="openBtn">Открыть в браузере ↗</a>
+    <small class="tg-only" data-i18n="tgHint">Если кнопка не сработала: нажмите ⋯ вверху справа → «Открыть в Safari» / «Открыть в браузере».</small>
   </div>
-  <h1>РАДИО</h1>
-  <p class="sub">Тысячи станций со всего мира.
-    <button class="install" id="install" type="button" hidden>⤓ Установить как приложение</button></p>
+  <div class="top">
+    <h1 data-i18n="brand">РАДИО</h1>
+    <div class="langs" role="group" aria-label="Язык / Language">
+      <button class="lang" type="button" data-lang="ru">RU</button>
+      <button class="lang" type="button" data-lang="en">EN</button>
+    </div>
+  </div>
+  <p class="sub"><span data-i18n="sub">Тысячи станций со всего мира.</span>
+    <button class="install" id="install" type="button" hidden data-i18n="install">⤓ Установить как приложение</button></p>
   <form class="search" id="form">
-    <input id="q" type="search" placeholder="Станция или жанр…" autocomplete="off">
+    <input id="q" type="search" placeholder="Станция или жанр…" data-i18n-ph="q" autocomplete="off">
     <select id="country">
-      <option value="">Все страны</option>
-      <option value="RU">Россия</option>
-      <option value="BY">Беларусь</option>
-      <option value="KZ">Казахстан</option>
-      <option value="PL">Польша</option>
-      <option value="latam">Латинская Америка</option>
-      <option value="baltic">Прибалтика</option>
-      <option value="US">США</option>
-      <option value="GB">Великобритания</option>
-      <option value="DE">Германия</option>
-      <option value="FR">Франция</option>
-      <option value="IT">Италия</option>
+      <option value="" data-i18n="c_all">Все страны</option>
+      <option value="RU" data-i18n="c_RU">Россия</option>
+      <option value="BY" data-i18n="c_BY">Беларусь</option>
+      <option value="KZ" data-i18n="c_KZ">Казахстан</option>
+      <option value="PL" data-i18n="c_PL">Польша</option>
+      <option value="latam" data-i18n="c_latam">Латинская Америка</option>
+      <option value="baltic" data-i18n="c_baltic">Прибалтика</option>
+      <option value="US" data-i18n="c_US">США</option>
+      <option value="GB" data-i18n="c_GB">Великобритания</option>
+      <option value="DE" data-i18n="c_DE">Германия</option>
+      <option value="FR" data-i18n="c_FR">Франция</option>
+      <option value="IT" data-i18n="c_IT">Италия</option>
     </select>
-    <button class="btn" type="submit">Найти</button>
+    <button class="btn" type="submit" data-i18n="find">Найти</button>
   </form>
   <div class="chips" id="chips"></div>
   <div class="opts">
-    <label><input type="checkbox" id="httpsOnly"> Только защищённые потоки (https)</label>
+    <label><input type="checkbox" id="httpsOnly"> <span data-i18n="httpsOnly">Только защищённые потоки (https)</span></label>
   </div>
 </header>
 
 <main>
-  <div class="status" id="status">Если станции не появляются — откройте радио в Safari или Chrome по ссылке <a href="https://radioglob.ru/" target="_blank" rel="noopener">radioglob.ru</a></div>
+  <div class="status" id="status" data-i18n-html="statusInit">Если станции не появляются — откройте радио в Safari или Chrome по ссылке <a href="https://radioglob.ru/" target="_blank" rel="noopener">radioglob.ru</a></div>
   <div class="grid" id="grid"></div>
 </main>
 
 <div class="player">
   <div class="player-in">
-    <button class="play" id="play" disabled title="Играть / пауза">▶</button>
+    <button class="play" id="play" disabled title="Играть / пауза" data-i18n-title="playTitle">▶</button>
     <div class="logo" id="nowLogo">♪</div>
     <div class="now">
-      <div class="name" id="nowName">Выберите станцию</div>
+      <div class="name" id="nowName" data-i18n="choose">Выберите станцию</div>
       <div class="meta" id="nowMeta">&nbsp;</div>
     </div>
-    <button class="save" id="save" type="button" disabled title="Записать трек в записную книжку" aria-label="Записать трек">♥</button>
+    <button class="save" id="save" type="button" disabled title="Записать трек в записную книжку" aria-label="Записать трек" data-i18n-title="saveTitle">♥</button>
     <div class="volbox">
-      <button class="vbtn" id="volDown" title="Тише" aria-label="Тише">−</button>
-      <input class="vol" id="vol" type="range" min="0" max="1" step="0.01" value="0.8" title="Громкость" aria-label="Громкость">
-      <button class="vbtn" id="volUp" title="Громче" aria-label="Громче">+</button>
+      <button class="vbtn" id="volDown" title="Тише" aria-label="Тише" data-i18n-title="quieter">−</button>
+      <input class="vol" id="vol" type="range" min="0" max="1" step="0.01" value="0.8" title="Громкость" aria-label="Громкость" data-i18n-title="volume">
+      <button class="vbtn" id="volUp" title="Громче" aria-label="Громче" data-i18n-title="louder">+</button>
     </div>
   </div>
 </div>
@@ -373,7 +386,9 @@
 window.onerror = function (msg, src, line) {
   if (msg === "Script error.") return; // ошибки чужих скриптов (hls.js с CDN) не показываем
   var el = document.getElementById("status");
-  if (el) el.textContent = "Ошибка: " + msg + " (строка " + line + "). Пришлите этот текст разработчику.";
+  if (el) el.textContent = document.documentElement.lang === "en"
+    ? "Error: " + msg + " (line " + line + "). Please send this text to the developer."
+    : "Ошибка: " + msg + " (строка " + line + "). Пришлите этот текст разработчику.";
 };
 </script>
 <script>
@@ -420,13 +435,13 @@ const REGIONS = {
 };
 
 const PRESETS = [
-  { label: "★ Избранное", fav: true },
-  { label: "📒 Записная книжка", notes: true },
-  { label: "Популярное в России", country: "RU" },
-  { label: "Беларусь", country: "BY" },
-  { label: "Казахстан", country: "KZ" },
+  { label: "★ Избранное", en: "★ Favorites", fav: true },
+  { label: "📒 Записная книжка", en: "📒 Track notebook", notes: true },
+  { label: "Популярное в России", en: "Popular in Russia", country: "RU" },
+  { label: "Беларусь", en: "Belarus", country: "BY" },
+  { label: "Казахстан", en: "Kazakhstan", country: "KZ" },
   // «Африка» и «Индия» — вручную: самые слушаемые станции, проверены 17.10.2026 (https, нет в реестре блокировок РКН)
-  { label: "Африка", ids: [
+  { label: "Африка", en: "Africa", ids: [
     "a3c93ca9-9891-4249-a805-d622dadeed21", // Cool FM, Лагос (Нигерия)
     "1dfcc339-6292-4bf1-8b21-5c4a099ecd7e", // Wazobia FM, Лагос (Нигерия)
     "ac15c045-6f16-4021-b35c-00b265b7201d", // Kameme FM (Кения)
@@ -438,7 +453,7 @@ const PRESETS = [
     "056d990a-7b48-4e95-b91e-ce59ca2701e8", // Galaxy FM (Уганда)
     "351eaaf0-2d2a-446b-8288-9f850588ba47"  // Top Congo FM (Конго)
   ] },
-  { label: "Индия", ids: [
+  { label: "Индия", en: "India", ids: [
     "cdd3b5a0-47f6-46d5-8209-b78e8b10ff6e", // Radio Mirchi Hindi
     "6b36ba4f-6d29-4272-b3c0-9aeeb64e61ec", // Mirchi Top 20
     "0e5dfcc8-99e2-4fed-a232-7f4bf23ba3c3", // Mirchi Love
@@ -450,9 +465,9 @@ const PRESETS = [
     "9ae30654-b1a6-4eff-81f3-6400d105b340", // Rafi Hit Songs
     "33fcdf94-5605-49bb-8e34-206f38c335dc"  // Goldy Evergreen
   ] },
-  { label: "Поп", tag: "pop", bg: "pop" },
+  { label: "Поп", en: "Pop", tag: "pop", bg: "pop" },
   // «K-pop» — вручную, без украинских станций. Проверены 17.10.2026: https, нет в реестре блокировок РКН
-  { label: "K-pop", bg: "pop", ids: [
+  { label: "K-pop", en: "K-pop", bg: "pop", ids: [
     "5144690c-8201-4394-83a4-06243ee848c3", // Europa Plus K-Pop
     "57b61666-0387-4732-a99b-0609dc1d36f6", // DFM K-POP
     "2e53ff8e-1d21-4e04-b0e9-f68257c4e7e9", // Only Hits K-Pop (США)
@@ -467,16 +482,16 @@ const PRESETS = [
     "168b79d5-be7b-436f-b144-759696655d6d", // HIT FM K-Pop Hits (Молдова)
     "2973ff08-fb80-4281-8b7a-33bd213b06d4"  // Juka Radio K-pop
   ] },
-  { label: "Рок", tag: "rock", bg: "rock" },
-  { label: "Джаз", tag: "jazz", bg: "jazz" },
-  { label: "Классика", tag: "classical", bg: "classical" },
-  { label: "Электроника", tag: "electronic", bg: "electronic" },
-  { label: "Ретро", tag: "oldies", bg: "retro" },
-  { label: "Lounge / Chill", tag: "chillout", bg: "chill" },
+  { label: "Рок", en: "Rock", tag: "rock", bg: "rock" },
+  { label: "Джаз", en: "Jazz", tag: "jazz", bg: "jazz" },
+  { label: "Классика", en: "Classical", tag: "classical", bg: "classical" },
+  { label: "Электроника", en: "Electronic", tag: "electronic", bg: "electronic" },
+  { label: "Ретро", en: "Retro", tag: "oldies", bg: "retro" },
+  { label: "Lounge / Chill", en: "Lounge / Chill", tag: "chillout", bg: "chill" },
   // «Наука» — подобранный вручную список (по тегу science в каталоге в основном старые фантастические спектакли).
   // Проверены 17.10.2026: живые и по https. Порядок здесь = порядок на экране, русская станция первой
   // «Фолк» — тоже вручную: по тегу folk в каталоге много случайного (KEXP, поп). Проверены 17.10.2026
-  { label: "Фолк", bg: "folk", ids: [
+  { label: "Фолк", en: "Folk", bg: "folk", ids: [
     "d68e43d8-3c7b-4bb8-9f22-4bb32bd750e0",
     "fee6751a-ad1a-4f9e-91cd-21269cc3b682",
     "28c0dc1a-9089-4dda-bf6e-7c3a45646212",
@@ -491,7 +506,7 @@ const PRESETS = [
     "b1939f76-1417-4058-8657-403e6fcf45ea",
     "aa6ee95d-e208-4592-a121-047056106596"
   ] },
-  { label: "Наука", bg: "science", ids: [
+  { label: "Наука", en: "Science", bg: "science", ids: [
     "c9773ed8-e9bd-4487-92a2-e8b1dbbaf891",
     "3d4c97c7-e122-4304-b8c8-52336683bda1",
     "21ab678c-ff19-4314-9969-165e15b4210d",
@@ -506,7 +521,7 @@ const PRESETS = [
     "3c2da98e-b7b7-4192-8ca4-3a625a301629"
   ] },
   // «Обучение» — вручную: языки (английский, китайский), история, лекции. Проверены 17.10.2026, все по https
-  { label: "Обучение", bg: "study", ids: [
+  { label: "Обучение", en: "Learning", bg: "study", ids: [
     "3fefef81-0b20-4193-9dc7-c5839f5391eb",
     "3f537d76-6041-4200-8804-c5b9f618ab5a",
     "49476d42-0ff1-4de2-b083-0c55a7231d55",
@@ -521,7 +536,7 @@ const PRESETS = [
     "31b735e5-f940-44e2-bcbb-b0af1d34b5e5"
   ] },
   // «Детям» — вручную: русские станции первыми, дальше проверенные зарубежные. Проверены 17.10.2026
-  { label: "Детям", bg: "kids", ids: [
+  { label: "Детям", en: "Kids", bg: "kids", ids: [
     "464bcd7d-6be6-4ae2-9232-38dda51effc7",
     "3f165fb8-873a-413b-8e09-ed389d9e0d18",
     "4c91b144-6ca1-462e-ab10-070ffb56a3b8",
@@ -539,7 +554,7 @@ const PRESETS = [
   ] },
   // «Юмор» — вручную: русские станции первыми, дальше зарубежные. Без украинских и 18+.
   // Проверены 17.10.2026: живые и по https. Основной «Юмор ФМ» и «Радио РБЖ» не отвечали — не включены
-  { label: "Юмор", bg: "humor", ids: [
+  { label: "Юмор", en: "Comedy", bg: "humor", ids: [
     "fc4e58a6-82b7-4a62-90c0-465f89d87603", // ЮморФМ: Стендапы
     "34458168-0aaa-44b4-abb9-aebced9d895e", // Женский Stand Up
     "6efab7cc-075c-413b-b231-23a6dc2bf17f", // Stand Up (101.ru)
@@ -554,7 +569,7 @@ const PRESETS = [
     "64179b77-7c6f-4e74-af5b-4bf3b5a1265a", // Rire et Chansons Sketches (Франция)
     "6e3b295f-54be-4c3c-8300-798150ddd940"  // FFN Comedy (Германия)
   ] },
-  { label: "Новости", tag: "news" },
+  { label: "Новости", en: "News", tag: "news" },
 ];
 
 const $ = id => document.getElementById(id);
@@ -568,6 +583,82 @@ function store(key, val) {
   } catch (e) { return null; }
 }
 let favs = store("radio.favs") || [];
+
+// Язык страницы: RU или EN. Выбор запоминается; при первом заходе — по языку браузера
+// (русский, белорусский, казахский, украинский → RU, остальные → EN). Проверка: ?lang=en
+const T = {
+  ru: {
+    brand: "РАДИО", sub: "Тысячи станций со всего мира.", install: "⤓ Установить как приложение",
+    q: "Станция или жанр…", find: "Найти", httpsOnly: "Только защищённые потоки (https)",
+    c_all: "Все страны", c_RU: "Россия", c_BY: "Беларусь", c_KZ: "Казахстан", c_PL: "Польша",
+    c_latam: "Латинская Америка", c_baltic: "Прибалтика", c_US: "США", c_GB: "Великобритания",
+    c_DE: "Германия", c_FR: "Франция", c_IT: "Италия",
+    fileTitle: "Радио работает только в браузере", tgTitle: "Откройте радио в браузере",
+    fileText: "Вы открыли файл. Нажмите кнопку — радио откроется в Safari или Chrome.",
+    tgText: "В Telegram звук пропадёт, как только вы свернёте приложение.",
+    openBtn: "Открыть в браузере ↗", openSafari: "Открыть в Safari ↗",
+    tgHint: "Если кнопка не сработала: нажмите ⋯ вверху справа → «Открыть в Safari» / «Открыть в браузере».",
+    statusInit: 'Если станции не появляются — откройте радио в Safari или Chrome по ссылке <a href="https://radioglob.ru/" target="_blank" rel="noopener">radioglob.ru</a>',
+    playTitle: "Играть / пауза", choose: "Выберите станцию", saveTitle: "Записать трек в записную книжку",
+    quieter: "Тише", louder: "Громче", volume: "Громкость",
+    catalogDown: "Каталог недоступен", loading: "Загружаю станции…",
+    loadFail: "Не удалось загрузить каталог. Проверьте интернет и попробуйте ещё раз.",
+    found: "Найдено станций: {n}", nothing: "Ничего не найдено. Попробуйте другой запрос или снимите галочку «только https».",
+    favTitle: "В избранное", favEmpty: "Пока пусто. Нажмите ☆ у станции, чтобы добавить её сюда.",
+    connecting: "Подключаюсь…", tryOther: "Пробую другой адрес станции…", onAir: "В эфире: ",
+    noAnswer: "Станция сейчас не отвечает — выберите другую", paused: "Пауза — нажмите ▶",
+    buffering: "Буферизация…", resume: "Нажмите ▶, чтобы продолжить",
+    askSong: "Станция не сообщает название песни. Впишите, что играет (или оставьте пустым — запишется станция и время):",
+    already: "Этот трек уже записан в книжку.", saved: "Записано в книжку: ", tracks: "Записано треков: {n}",
+    notesEmpty: "Пока пусто. Когда играет песня, нажмите ♥ в плеере внизу — она запишется сюда.",
+    notesBar: "Книжка хранится в радио на этом устройстве — на телефоне и компьютере она своя.",
+    playSt: "Включить станцию", yt: "Найти на YouTube", ya: "Найти в Яндекс Музыке", del: "Удалить из книжки"
+  },
+  en: {
+    brand: "RADIO", sub: "Thousands of stations from all over the world.", install: "⤓ Install as an app",
+    q: "Station or genre…", find: "Search", httpsOnly: "Secure streams only (https)",
+    c_all: "All countries", c_RU: "Russia", c_BY: "Belarus", c_KZ: "Kazakhstan", c_PL: "Poland",
+    c_latam: "Latin America", c_baltic: "Baltic states", c_US: "USA", c_GB: "United Kingdom",
+    c_DE: "Germany", c_FR: "France", c_IT: "Italy",
+    fileTitle: "The radio only works in a browser", tgTitle: "Open the radio in your browser",
+    fileText: "You opened a file. Tap the button and the radio will open in Safari or Chrome.",
+    tgText: "In Telegram the sound stops as soon as you minimize the app.",
+    openBtn: "Open in browser ↗", openSafari: "Open in Safari ↗",
+    tgHint: "If the button does not work: tap ⋯ in the top right → “Open in Safari” / “Open in browser”.",
+    statusInit: 'If no stations appear, open the radio in Safari or Chrome: <a href="https://radioglob.ru/" target="_blank" rel="noopener">radioglob.ru</a>',
+    playTitle: "Play / pause", choose: "Choose a station", saveTitle: "Save the track to the notebook",
+    quieter: "Quieter", louder: "Louder", volume: "Volume",
+    catalogDown: "Catalog unavailable", loading: "Loading stations…",
+    loadFail: "Could not load the catalog. Check your connection and try again.",
+    found: "Stations found: {n}", nothing: "Nothing found. Try another search or untick “https only”.",
+    favTitle: "Add to favorites", favEmpty: "Nothing here yet. Tap ☆ next to a station to add it.",
+    connecting: "Connecting…", tryOther: "Trying another stream address…", onAir: "On air: ",
+    noAnswer: "The station is not responding — choose another one", paused: "Paused — tap ▶",
+    buffering: "Buffering…", resume: "Tap ▶ to continue",
+    askSong: "The station does not report the song title. Type what is playing (or leave empty to save the station and time):",
+    already: "This track is already in the notebook.", saved: "Saved to the notebook: ", tracks: "Saved tracks: {n}",
+    notesEmpty: "Nothing here yet. When a song is playing, tap ♥ in the player below to save it here.",
+    notesBar: "The notebook is stored in the radio on this device — your phone and computer each have their own.",
+    playSt: "Play the station", yt: "Search on YouTube", ya: "Search on Yandex Music", del: "Remove from the notebook"
+  }
+};
+let lang = (location.search.match(/lang=(ru|en)/) || [])[1] || store("radio.lang") ||
+  (/^(ru|be|kk|uk)/i.test(navigator.language || "") ? "ru" : "en");
+if (!T[lang]) lang = "ru";
+function t(key, n) { return (T[lang][key] || T.ru[key] || key).replace("{n}", n); }
+function presetLabel(p) { return lang === "en" && p.en ? p.en : p.label; }
+// Переводим всё, что размечено data-i18n* в HTML, и подписи подборок
+function applyLang() {
+  document.documentElement.lang = lang;
+  if (document.title === T.ru.brand || document.title === T.en.brand) document.title = t("brand");
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.getAttribute("data-i18n")); });
+  document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = t(el.getAttribute("data-i18n-html")); });
+  document.querySelectorAll("[data-i18n-ph]").forEach(el => { el.placeholder = t(el.getAttribute("data-i18n-ph")); });
+  document.querySelectorAll("[data-i18n-title]").forEach(el => {
+    el.title = t(el.getAttribute("data-i18n-title")); el.setAttribute("aria-label", el.title); });
+  document.querySelectorAll(".lang").forEach(b => b.classList.toggle("on", b.getAttribute("data-lang") === lang));
+  document.querySelectorAll(".chip").forEach((c, i) => { if (PRESETS[i]) c.textContent = presetLabel(PRESETS[i]); });
+}
 // Во встроенном браузере Telegram кнопка ведёт во внешний браузер:
 // на айфоне — схема x-safari-https (iOS 17+), на Android — intent, который откроет браузер по умолчанию
 if (/\btg\b/.test(document.documentElement.className)) {
@@ -575,7 +666,7 @@ if (/\btg\b/.test(document.documentElement.className)) {
   const ua = navigator.userAgent;
   if (/iPhone|iPad|iPod/.test(ua)) $("openwebBtn").href = "x-safari-https://" + site;
   else if (/Android/.test(ua)) $("openwebBtn").href = "intent://" + site + "#Intent;scheme=https;S.browser_fallback_url=https%3A%2F%2F" + encodeURIComponent(site) + ";end";
-  $("openwebBtn").textContent = /iPhone|iPad|iPod/.test(ua) ? "Открыть в Safari ↗" : "Открыть в браузере ↗";
+  if (/iPhone|iPad|iPod/.test(ua)) $("openwebBtn").setAttribute("data-i18n", "openSafari");
 }
 // На https-сайте (GitHub Pages) браузер не пускает http-потоки, поэтому там показываем только защищённые
 if (location.protocol === "https:") {
@@ -602,19 +693,19 @@ async function api(path) {
       if (r.ok) return await r.json();
     } catch (e) { lastErr = e; }
   }
-  throw lastErr || new Error("Каталог недоступен");
+  throw lastErr || new Error(t("catalogDown"));
 }
 
 // Подборка из конкретных станций по их номерам в каталоге, в заданном порядке
 async function loadIds(ids) {
-  $("status").textContent = "Загружаю станции…";
+  $("status").textContent = t("loading");
   $("grid").innerHTML = "";
   try {
     let list = await api("/json/stations/byuuid?uuids=" + ids.join(","));
     list.sort((a, b) => ids.indexOf(a.stationuuid) - ids.indexOf(b.stationuuid));
     render(list);
   } catch (e) {
-    $("status").textContent = "Не удалось загрузить каталог. Проверьте интернет и попробуйте ещё раз.";
+    $("status").textContent = t("loadFail");
   }
 }
 
@@ -623,7 +714,7 @@ async function search({ name = "", tag = "", country = "" } = {}) {
   if (name) p.set("name", name);
   if (tag) p.set("tag", tag);
   if (country) p.set("countrycode", country);
-  $("status").textContent = "Загружаю станции…";
+  $("status").textContent = t("loading");
   $("grid").innerHTML = "";
   try {
     let list = await api("/json/stations/search?" + p);
@@ -634,7 +725,7 @@ async function search({ name = "", tag = "", country = "" } = {}) {
     }
     render(list);
   } catch (e) {
-    $("status").textContent = "Не удалось загрузить каталог. Проверьте интернет и попробуйте ещё раз.";
+    $("status").textContent = t("loadFail");
   }
 }
 
@@ -692,11 +783,12 @@ function render(list) {
     if (!main.favicon) { const withLogo = g.find(st => st.favicon); if (withLogo) main.favicon = withLogo.favicon; }
     lastList.push(main);
   });
-  $("status").textContent = lastList.length ? `Найдено станций: ${lastList.length}` : "";
+  $("status").textContent = lastList.length ? t("found", lastList.length) : "";
   const grid = $("grid");
   grid.innerHTML = "";
   if (!lastList.length) {
-    grid.innerHTML = '<div class="empty">Ничего не найдено. Попробуйте другой запрос или снимите галочку «только https».</div>';
+    grid.innerHTML = '<div class="empty"></div>';
+    grid.firstChild.textContent = t("nothing");
     return;
   }
   for (const s of lastList) grid.appendChild(card(s));
@@ -767,7 +859,7 @@ function card(s) {
   const isFav = () => favs.some(x => x.stationuuid === s.stationuuid);
   f.className = "fav" + (isFav() ? " on" : "");
   f.textContent = isFav() ? "★" : "☆";
-  f.title = "В избранное";
+  f.title = t("favTitle");
   f.onclick = e => {
     e.stopPropagation();
     favs = isFav() ? favs.filter(x => x.stationuuid !== s.stationuuid) : [...favs, s];
@@ -789,7 +881,7 @@ function playStation(s) {
   current = s;
   store("radio.last", s);
   $("nowName").textContent = s.name.trim();
-  setMarquee("Подключаюсь…");
+  setMarquee(t("connecting"));
   $("nowLogo").replaceWith(Object.assign(logoEl(s), { id: "nowLogo" }));
   $("play").disabled = false;
   markPlaying();
@@ -826,7 +918,7 @@ function nextUrl() {
   const urls = current.urls || [current.url_resolved];
   if (urlIndex + 1 < urls.length) {
     urlIndex++;
-    setMarquee("Пробую другой адрес станции…");
+    setMarquee(t("tryOther"));
     connect();
   } else {
     if (hls) { hls.destroy(); hls = null; }
@@ -850,7 +942,7 @@ function setMarquee(note) {
       const b = document.createElement("b"); b.className = "song"; b.textContent = "♪ " + nowSong;
       sp.appendChild(b); sp.appendChild(document.createTextNode(" · "));
     }
-    sp.appendChild(document.createTextNode((note ? note + " · " : "В эфире: ") + parts.join(" · ")));
+    sp.appendChild(document.createTextNode((note ? note + " · " : t("onAir")) + parts.join(" · ")));
   });
   const len = el.querySelector(".track > span").textContent.length;
   el.style.setProperty("--dur", Math.max(10, Math.round(len * 0.28)) + "s"); // скорость одинаковая при любой длине
@@ -862,14 +954,14 @@ function stopMarquee(text) {
   const el = $("nowMeta");
   el.className = "meta";
   el.textContent = text;
-  setTitleMarquee("", "РАДИО");
+  setTitleMarquee("", t("brand"));
 }
 // Та же бегущая строка в заголовке вкладки — её видно на кнопке окна в панели задач и при наведении на неё.
 // В свёрнутом окне браузер крутит таймер не чаще раза в секунду — строка бежит медленнее, это нормально
 let titleChars = [], titlePos = 0, titleTimer = null;
 function setTitleMarquee(text, still) {
   clearInterval(titleTimer);
-  if (!text) { document.title = still || "РАДИО"; return; }
+  if (!text) { document.title = still || t("brand"); return; }
   titleChars = Array.from(text + "   •   "); // Array.from — чтобы не разрезать эмодзи пополам
   titlePos = 0;
   const tick = () => {
@@ -924,29 +1016,29 @@ function watchSong() {
 function updateSessionTitle() {
   if (!("mediaSession" in navigator) || !navigator.mediaSession.metadata) return;
   navigator.mediaSession.metadata.title = nowSong || current.name.trim();
-  navigator.mediaSession.metadata.artist = nowSong ? current.name.trim() : "РАДИО";
+  navigator.mediaSession.metadata.artist = nowSong ? current.name.trim() : t("brand");
 }
 
 // Название и логотип на экране блокировки телефона, кнопки пауза/играть в шторке
 function setMediaSession(s) {
   if (!("mediaSession" in navigator)) return;
   const art = logoSources(s).slice(0, 1).map(src => ({ src, sizes: "512x512" }));
-  navigator.mediaSession.metadata = new MediaMetadata({ title: s.name.trim(), artist: "РАДИО", artwork: art });
+  navigator.mediaSession.metadata = new MediaMetadata({ title: s.name.trim(), artist: t("brand"), artwork: art });
   navigator.mediaSession.setActionHandler("play", () => playStation(current));
   navigator.mediaSession.setActionHandler("pause", () => audio.pause());
 }
 
 function failed() {
   document.documentElement.classList.remove("on-air");
-  stopMarquee("Станция сейчас не отвечает — выберите другую");
+  stopMarquee(t("noAnswer"));
   $("play").textContent = "▶";
   $("play").classList.remove("on");
 }
 
 audio.addEventListener("playing", () => { clearTimeout(connectTimer); $("play").textContent = "❚❚"; $("play").classList.add("on"); document.documentElement.classList.add("on-air"); $("save").disabled = false; setMarquee(); watchSong(); });
 audio.addEventListener("pause", () => { $("play").textContent = "▶"; $("play").classList.remove("on"); document.documentElement.classList.remove("on-air"); $("save").disabled = true; clearInterval(songTimer);
-  if (userPaused) { userPaused = false; stopMarquee("Пауза — нажмите ▶"); } });
-audio.addEventListener("waiting", () => { setMarquee("Буферизация…"); });
+  if (userPaused) { userPaused = false; stopMarquee(t("paused")); } });
+audio.addEventListener("waiting", () => { setMarquee(t("buffering")); });
 audio.addEventListener("error", () => { if (audio.getAttribute("src") && current) nextUrl(); });
 
 // Записная книжка: кнопка ♥ запоминает, что сейчас играет (песня, станция, время). Хранится в этом браузере.
@@ -962,18 +1054,18 @@ $("save").onclick = () => {
   if (!current) return;
   let song = nowSong;
   if (!song) {
-    song = window.prompt("Станция не сообщает название песни. Впишите, что играет (или оставьте пустым — запишется станция и время):", "");
+    song = window.prompt(t("askSong"), "");
     if (song === null) return; // нажали «Отмена»
     song = song.trim();
   }
   const name = current.name.trim();
   if (notes[0] && notes[0].song === song && notes[0].station === name && song) {
-    $("status").textContent = "Этот трек уже записан в книжку.";
+    $("status").textContent = t("already");
   } else {
     notes.unshift({ song: song, station: name, time: Date.now(), s: current });
     notes = notes.slice(0, 500);
     store("radio.notes", notes);
-    $("status").textContent = "Записано в книжку: " + (song || name) + (song ? " (" + name + ")" : "");
+    $("status").textContent = t("saved") + (song || name) + (song ? " (" + name + ")" : "");
   }
   $("save").classList.add("done");
   setTimeout(() => $("save").classList.remove("done"), 600);
@@ -982,14 +1074,15 @@ $("save").onclick = () => {
 function renderNotes() {
   const grid = $("grid");
   grid.innerHTML = "";
-  $("status").textContent = notes.length ? "Записано треков: " + notes.length : "";
+  $("status").textContent = notes.length ? t("tracks", notes.length) : "";
   if (!notes.length) {
-    grid.innerHTML = '<div class="empty">Пока пусто. Когда играет песня, нажмите ♥ в плеере внизу — она запишется сюда.</div>';
+    grid.innerHTML = '<div class="empty"></div>';
+    grid.firstChild.textContent = t("notesEmpty");
     return;
   }
   const bar = document.createElement("div");
   bar.className = "notes-bar";
-  bar.textContent = "Книжка хранится в радио на этом устройстве — на телефоне и компьютере она своя.";
+  bar.textContent = t("notesBar");
   grid.appendChild(bar);
   notes.forEach((n, i) => {
     const c = document.createElement("div");
@@ -1004,10 +1097,10 @@ function renderNotes() {
     const acts = document.createElement("div");
     acts.className = "acts";
     const q = encodeURIComponent(n.song || n.station);
-    acts.innerHTML = '<button type="button" title="Включить станцию">▶</button>' +
-      (n.song ? '<a target="_blank" rel="noopener" title="Найти на YouTube" href="https://www.youtube.com/results?search_query=' + q + '">YT</a>' +
-                '<a target="_blank" rel="noopener" title="Найти в Яндекс Музыке" href="https://music.yandex.ru/search?text=' + q + '">Я</a>' : "") +
-      '<button type="button" title="Удалить из книжки">✕</button>';
+    acts.innerHTML = '<button type="button" title="' + t("playSt") + '">▶</button>' +
+      (n.song ? '<a target="_blank" rel="noopener" title="' + t("yt") + '" href="https://www.youtube.com/results?search_query=' + q + '">YT</a>' +
+                '<a target="_blank" rel="noopener" title="' + t("ya") + '" href="https://music.yandex.ru/search?text=' + q + '">Я</a>' : "") +
+      '<button type="button" title="' + t("del") + '">✕</button>';
     acts.firstChild.onclick = () => playStation(n.s);
     acts.lastChild.onclick = () => { notes.splice(i, 1); store("radio.notes", notes); renderNotes(); };
     c.appendChild(acts);
@@ -1064,7 +1157,7 @@ function setStyleBg(name) {
 PRESETS.forEach((p, i) => {
   const b = document.createElement("button");
   b.className = "chip";
-  b.textContent = p.label;
+  b.textContent = presetLabel(p);
   b.onclick = () => {
     setChip(i);
     $("q").value = ""; $("country").value = p.country || "";
@@ -1074,7 +1167,7 @@ PRESETS.forEach((p, i) => {
       renderNotes();
     } else if (p.fav) {
       render(favs);
-      if (!favs.length) $("grid").innerHTML = '<div class="empty">Пока пусто. Нажмите ☆ у станции, чтобы добавить её сюда.</div>';
+      if (!favs.length) { $("grid").innerHTML = '<div class="empty"></div>'; $("grid").firstChild.textContent = t("favEmpty"); }
     } else {
       search({ tag: p.tag, country: p.country });
     }
@@ -1095,10 +1188,30 @@ const last = store("radio.last");
 if (last) {
   current = last;
   $("nowName").textContent = last.name.trim();
-  stopMarquee("Нажмите ▶, чтобы продолжить");
+  stopMarquee(t("resume"));
   $("nowLogo").replaceWith(Object.assign(logoEl(last), { id: "nowLogo" }));
   $("play").disabled = false;
 }
+applyLang();
+// Смена языка на лету: радио продолжает играть, переводим подписи, строку плеера и открытый список
+document.querySelectorAll(".lang").forEach(b => b.onclick = () => {
+  lang = b.getAttribute("data-lang");
+  store("radio.lang", lang);
+  applyLang();
+  if (current) {
+    $("nowName").textContent = current.name.trim();
+    if (!audio.paused) setMarquee(); else stopMarquee(t("resume"));
+  }
+  if (notesOpen()) renderNotes();
+  else if (lastList.length && $("grid").querySelector(".card")) {
+    $("status").textContent = t("found", lastList.length);
+    $("grid").querySelectorAll(".fav").forEach(f => { f.title = t("favTitle"); });
+  } else {
+    const e = $("grid").querySelector(".empty"), on = document.querySelector(".chip.on");
+    const p = on ? PRESETS[[].indexOf.call(document.querySelectorAll(".chip"), on)] : null;
+    if (e) e.textContent = t(p && p.fav ? "favEmpty" : "nothing");
+  }
+});
 setChip(PRESETS.findIndex(p => p.country === "RU" && !p.tag));
 search({ country: "RU" });
 </script>
