@@ -67,9 +67,13 @@
     --page: #1a1c21; --bg: #2f333c; --text: #edf2f7; --muted: #a0aec0; --accent: #63b3ed;
     --light: #414753; --dark: #101114; --ring: rgba(99, 179, 237, .12); --edge: rgba(255, 255, 255, .09);
   }
+  /* Фирменный шрифт Road Radio (Glenjan): лежит в папке fonts, полная кириллица, все буквы заглавные */
+  @font-face { font-family: "RoadRadio"; src: url("fonts/RoadRadio.woff") format("woff"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: "RoadRadio"; src: url("fonts/RoadRadio-Bold.woff") format("woff"); font-weight: 700; font-display: swap; }
+  @font-face { font-family: "RoadRadio"; src: url("fonts/RoadRadio-Black.woff") format("woff"); font-weight: 900; font-display: swap; }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--page); color: var(--text);
-    font: 15px/1.45 "Segoe UI", system-ui, sans-serif; padding-bottom: 120px; }
+    font: 15px/1.4 "RoadRadio", "Segoe UI", system-ui, sans-serif; letter-spacing: .02em; padding-bottom: 120px; }
   /* Неподвижный слой с волнами (background-attachment: fixed не работает на айфоне), к краям волны тают */
   .waves { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; pointer-events: none; overflow: hidden;
     background: repeating-radial-gradient(circle at calc(100% - 44px) 44px, transparent 0 56px, var(--ring) 56px 58px);
@@ -200,7 +204,7 @@
   @keyframes wave { from { transform: scale(1); opacity: .55; } to { transform: scale(40); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { .on-air .antenna i { animation: none; } }
   header { max-width: 1100px; margin: 0 auto; padding: 28px 16px 8px; }
-  h1 { margin: 0 0 4px; font-size: 26px; text-shadow: 1px 1px 1px var(--light), -1px -1px 1px var(--dark); }
+  h1 { margin: 0 0 4px; font-size: 44px; line-height: 1; font-weight: 900; letter-spacing: .08em; text-shadow: 1px 1px 1px var(--light), -1px -1px 1px var(--dark); }
   .sub { color: var(--muted); margin: 0 0 20px; }
   .install { margin-left: 8px; padding: 4px 12px; border-radius: 999px; font-size: 13px; color: var(--accent);
     border: 1px solid var(--edge); box-shadow: var(--out-sm); }
@@ -297,7 +301,7 @@
   .tg .openweb .file-only { display: none; }
   button, .card { -webkit-tap-highlight-color: transparent; }
   /* На телефоне громкость регулируют кнопками на корпусе — ползунок только мешает названию */
-  @media (max-width: 520px) { .volbox { display: none; } h1 { font-size: 22px; } .grid { gap: 14px; }
+  @media (max-width: 520px) { .volbox { display: none; } h1 { font-size: 36px; } .grid { gap: 14px; }
     .search select { flex: 1 1 100%; } .btn { flex: 1 1 100%; } }
 </style>
 </head>
@@ -317,7 +321,7 @@
   <p class="sub">Тысячи станций со всего мира.
     <button class="install" id="install" type="button" hidden>⤓ Установить как приложение</button></p>
   <form class="search" id="form">
-    <input id="q" type="search" placeholder="Название станции или жанр…" autocomplete="off">
+    <input id="q" type="search" placeholder="Станция или жанр…" autocomplete="off">
     <select id="country">
       <option value="">Все страны</option>
       <option value="RU">Россия</option>
