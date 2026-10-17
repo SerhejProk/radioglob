@@ -405,16 +405,14 @@ const PRESETS = [
     "68f52212-e3b0-479b-9da6-962a6c5e713d",
     "3c2da98e-b7b7-4192-8ca4-3a625a301629"
   ] },
-  // «Обучение» — вручную: языки (английский, китайский, Морзе), история, лекции. Проверены 17.10.2026, все по https
+  // «Обучение» — вручную: языки (английский, китайский), история, лекции. Проверены 17.10.2026, все по https
   { label: "Обучение", bg: "study", ids: [
     "3fefef81-0b20-4193-9dc7-c5839f5391eb",
     "3f537d76-6041-4200-8804-c5b9f618ab5a",
-    "fd200b5d-0137-4a87-8afc-3275da795c2a",
     "49476d42-0ff1-4de2-b083-0c55a7231d55",
     "eecbb174-db4f-4bb1-95a2-96fc60312f84",
     "4540380c-8d7c-49da-b0dc-699c1fb30ebc",
     "7c4fb276-5340-4e47-8c1c-8cacae66f98a",
-    "98137c5f-fd3b-4d5c-8e91-12752b81396d",
     "adca3071-8636-4114-a18e-2d458054ed58",
     "05ee93a8-e030-40a8-89a8-713890672ee5",
     "c055fc23-49fb-42a2-a84b-992081fb4ee3",
@@ -497,8 +495,6 @@ async function loadIds(ids) {
   try {
     let list = await api("/json/stations/byuuid?uuids=" + ids.join(","));
     list.sort((a, b) => ids.indexOf(a.stationuuid) - ids.indexOf(b.stationuuid));
-    // Станции Украины не показываем
-    list = list.filter(s => s.countrycode !== "UA");
     render(list);
   } catch (e) {
     $("status").textContent = "Не удалось загрузить каталог. Проверьте интернет и попробуйте ещё раз.";
@@ -519,15 +515,38 @@ async function search({ name = "", tag = "", country = "" } = {}) {
       p.delete("name"); p.set("tag", name.toLowerCase());
       list = await api("/json/stations/search?" + p);
     }
-    // Станции Украины не показываем
-    list = list.filter(s => s.countrycode !== "UA");
     render(list);
   } catch (e) {
     $("status").textContent = "Не удалось загрузить каталог. Проверьте интернет и попробуйте ещё раз.";
   }
 }
 
+// Кого не показываем нигде (поиск, подборки, избранное) — решение Сергея, 17.10.2026.
+// 1) Украинские станции: код страны UA, сайт или поток в зоне .ua, вещание только на украинском,
+//    «Украина»/«Радіо» в названии или тегах. Станции, где украинский — лишь один из языков, остаются.
+// 2) СМИ-иноагенты и «нежелательные организации» по реестрам РФ: «Радио Свобода» (RFE/RL) со всеми
+//    проектами («Крым.Реалии», «Настоящее время», «Азаттык», «Свабода»…), «Голос Америки» (VOA),
+//    «Дождь», «Эхо», «Медуза», «Белсат», «Еврорадио», «Новая газета Европа», The Insider;
+//    а также спам-станции с тегом «to people of russia…».
+const UA_NAME = /украин|україн|ukrain|ukraiņ|радіо/i;
+const UA_LANG = /^(ukrainian|ukranian|ukrainisch|украинский|українська)$/i;
+const UA_URL = /\/\/[^\/:]*\.ua([\/:]|$)/i;
+const BLOCKED_NAME = /свобода|свабода|svoboda|svaboda|голос америки|voice of america|\bvoa\b|дождь тв|телеканал дождь|tv rain|^эхо( ?fm)?( online)?$|^echo эхо|крым\.? ?реалии|настоящее время|азаттык|azattyk|медуза|meduza|белсат|belsat|еврорадио|euroradio|радио азатлык/i;
+const BLOCKED_URL = /svoboda\.org|svaboda\.org|rferl\.org|krymr\.com|currenttime\.tv|azattyq\.org|azattyk\.org|azatutyun\.am|ozodi\.org|ozodlik\.org|radiofarda\.com|idelreal\.org|kavkazr\.com|sibreal\.org|severreal\.org|rfe-ingest|rfe0\d\.akacast|radiojar\.com\/hcrb063nn3quv|voanews\.com|golos-ameriki|tvrain|echofm\.online|echo02\.online|noasrv\.caster\.fm:10034|meduza\.io|belsat\.eu|euroradio\.fm|novayagazeta\.eu|theins\.ru/i;
+const BLOCKED_TAG = /to people of russia/i;
+function allowed(s) {
+  if (s.countrycode === "UA") return false;
+  const name = (s.name || "").trim(), tags = s.tags || "";
+  const urls = [s.homepage, s.url, s.url_resolved].join(" ");
+  const langs = (s.language || "").split(",").filter(Boolean);
+  if (UA_NAME.test(name) || /ukrain|україн|украин/i.test(tags) || UA_URL.test(urls)) return false;
+  if (langs.length && langs.every(l => UA_LANG.test(l.trim()))) return false;
+  if (BLOCKED_NAME.test(name) || BLOCKED_TAG.test(tags)) return false;
+  return !BLOCKED_URL.test(urls);
+}
+
 function render(list) {
+  list = list.filter(allowed);
   lastListRaw = list;
   const httpsOnly = $("httpsOnly").checked;
   // Одна станция часто лежит в каталоге несколько раз — оставляем одну, предпочитая поток по https
