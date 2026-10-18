@@ -199,6 +199,27 @@
     [data-style="humor"] .waves {
       background-size: 90px 180px, 64px 32px, auto, auto;
       background-position: right 8px top 10px, 0 0, 0 0, 0 0; } }
+  /* Медитация — круг дзен (энсо) в углу, круги по воде снизу, мягкий шалфейный и лавандовый свет */
+  [data-style="zen"] .waves {
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none' stroke='rgb(77,124,107)' stroke-linecap='round'%3E%3Cpath d='M150 52A70 70 0 1 0 166 112' stroke-opacity='.38' stroke-width='11'/%3E%3Cpath d='M154 58A64 64 0 1 0 160 118' stroke-opacity='.18' stroke-width='3'/%3E%3C/svg%3E") no-repeat right -20px top 10px / 280px 280px,
+      repeating-radial-gradient(ellipse 100% 40% at 15% 100%, transparent 0 34px, rgba(77, 124, 107, .14) 34px 36px),
+      radial-gradient(circle at 80% 15%, rgba(167, 139, 250, .20), transparent 45%),
+      radial-gradient(circle at 20% 90%, rgba(77, 124, 107, .22), transparent 50%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 30%, rgba(0,0,0,.45) 60%, #000);
+    mask-image: linear-gradient(to bottom, #000 30%, rgba(0,0,0,.45) 60%, #000); }
+  /* Литература — раскрытая книга в углу, строки страницы и тёплый свет настольной лампы */
+  [data-style="books"] .waves {
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 160' fill='none' stroke='rgb(138,90,68)' stroke-linecap='round'%3E%3Cpath d='M110 30q-40-18-90-6v110q50-12 90 6q40-18 90-6V24q-50-12-90 6Z' stroke-opacity='.45' stroke-width='3'/%3E%3Cpath d='M110 30v110' stroke-opacity='.45' stroke-width='3'/%3E%3Cpath d='M34 50q30-6 62 2M34 66q30-6 62 2M34 82q30-6 62 2M34 98q30-6 62 2M124 52q32-8 62-2M124 68q32-8 62-2M124 84q32-8 62-2M124 100q32-8 62-2' stroke-opacity='.25' stroke-width='2'/%3E%3Cpath d='M150 20v34l8-6 8 6V18' fill='rgb(185,28,28)' fill-opacity='.3' stroke='none'/%3E%3C/svg%3E") no-repeat right -10px top 16px / 300px 218px,
+      repeating-linear-gradient(to bottom, transparent 0 27px, rgba(138, 90, 68, .10) 27px 28px),
+      radial-gradient(ellipse at 85% 0%, rgba(234, 179, 8, .24), transparent 55%),
+      radial-gradient(circle at 0% 100%, rgba(138, 90, 68, .18), transparent 50%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 35%, rgba(0,0,0,.45));
+    mask-image: linear-gradient(to bottom, #000 35%, rgba(0,0,0,.45)); }
+  @media (max-width: 640px) {
+    [data-style="zen"] .waves { background-size: 180px 180px, auto, auto, auto; background-position: right -20px top 6px, 0 0, 0 0, 0 0; }
+    [data-style="books"] .waves { background-size: 190px 138px, auto, auto, auto; background-position: right -10px top 10px, 0 0, 0 0, 0 0; } }
   @keyframes drift { from { background-position: 0% 0%; } to { background-position: 100% 100%; } }
   @media (prefers-reduced-motion: reduce) { [data-style="chill"] .waves { animation: none; } }
   /* Антенна и бегущие волны, пока играет станция */
@@ -764,6 +785,31 @@ const PRESETS = [
   { label: "Электроника", en: "Electronic", tag: "electronic", bg: "electronic" },
   { label: "Ретро", en: "Retro", tag: "oldies", bg: "retro" },
   { label: "Lounge / Chill", en: "Lounge / Chill", tag: "chillout", bg: "chill" },
+  // «Медитация» — вручную: русские станции первыми, дальше эмбиент, тихая классика, звуки природы, мантры.
+  // Проверены 18.10.2026: живые, по https, нет в стоп-списке и в реестре блокировок РКН.
+  // Radio Art (хоралы, сольфеджио) не вошли: в каталоге только по http
+  { label: "Медитация", en: "Meditation", bg: "zen", ids: [
+    "43e64ad6-ac2c-4765-8b57-a69dd0aca6ce", // Монте-Карло Meditation
+    "78766053-a2d1-4cd8-9042-7eb8fde7da16", // Relax FM для медитации
+    "3018f5e2-cd55-41cd-8833-c484f24c1d69", // Звуки природы
+    "5886456b-6ed3-40c8-a2c4-4167793d225b", // Ambient Sleeping Pill (США)
+    "960eb2e9-0601-11e8-ae97-52543be04c81", // SomaFM Drone Zone (США)
+    "44b7f191-9478-46b0-a3b5-5a0ea2b2d64e", // ambient.fm (США)
+    "4c0118e7-97d9-4657-9bb8-427758a4aa85", // Epic Lounge Sleep & Meditation (Германия)
+    "b26c3de7-c2ca-4595-95b7-af9f42db3f75", // Epic Classical Meditation (Германия)
+    "90b8d638-7bea-4d60-a51d-b04cac09fd78", // Klassik Radio Healing (Германия)
+    "662a7a0a-4cf3-4278-9526-4c7363bc4f1d", // RPR1 Yoga Sounds (Германия)
+    "97219d62-7c14-45b8-bbdb-48d0403f907c", // Positively Meditation (ОАЭ)
+    "2808c734-6166-4cda-9bbd-d4e05c0c4c32", // Relax & Meditation (Швеция)
+    "f2be95c6-1e79-4aae-8f6b-6f3d7fc8dc9e", // 1st Greek New Age (Греция)
+    "77eaf32d-241f-4f25-b7d6-347783cd4471", // Nature Radio Sleep (Италия)
+    "95277bca-2c9a-4c08-b2e7-0854e5793f8e", // Nature Radio Rain — дождь (Канада)
+    "87aa35fa-37b4-47bf-bb10-bceeb024a7d3", // Radio Nature (Испания)
+    "04c6c260-eafc-419c-b374-f061080bfd81", // 24/7 Seawaves — море (Великобритания)
+    "9db7f22c-3997-40e6-a039-c045069ec42f", // 24/7 Country Walks — лес (Великобритания)
+    "75ac78d4-67f0-40a7-87a7-14a217d6764c", // Mahakatha — мантры (Индия)
+    "daf5768f-048b-4c70-8084-a795fae32eb1"  // World Buddhist Radio (Австралия)
+  ] },
   // «Наука» — подобранный вручную список (по тегу science в каталоге в основном старые фантастические спектакли).
   // Проверены 17.10.2026: живые и по https. Порядок здесь = порядок на экране, русская станция первой
   // «Фолк» — тоже вручную: по тегу folk в каталоге много случайного (KEXP, поп). Проверены 17.10.2026
@@ -810,6 +856,20 @@ const PRESETS = [
     "8e979832-71a9-4f4e-ace1-3e6e494a027a",
     "140cbc06-7365-40c8-b81e-564f55e7f290",
     "31b735e5-f940-44e2-bcbb-b0af1d34b5e5"
+  ] },
+  // «Литература» — вручную: аудиокниги, чтения, стихи, радиоспектакли; русские первыми.
+  // Проверены 18.10.2026: живые, по https, нет в стоп-списке и в реестре блокировок РКН.
+  // «Радио Книга», «Радио Фантастики», «Модель для сборки», «Милли Китап» не отвечали — не включены.
+  // Без повторов с другими подборками: «Культура», Historyradio.org, Indie Beat Spoken Word — в «Обучении», Сказка FM — в «Детям»
+  { label: "Литература", en: "Literature", bg: "books", ids: [
+    "7bc931dc-3fac-43d6-ba2d-1b5c6db73e56", // Радио Книга Вслух — аудиокниги
+    "8dd1bda9-26b8-4312-ad67-b3d98eaf439a", // «Отклик» — русская поэзия
+    "4d500348-dfbd-449e-8fbe-59d4fcd2ce90", // AudioBook Radio (США)
+    "bd089c10-1777-4e01-a35e-32cf915dbed4", // Philip Marlowe — радиоспектакли (США)
+    "e4de7e26-ec83-455e-a4d5-34ff71429f21", // Signal From Tomorrow — фантастика (США)
+    "3d91ba0d-c4fa-4a30-ae4d-73aff8e9bc91", // Bedtime Stories — сказки на ночь (ОАЭ)
+    "3f676fb0-3870-4494-8ef2-8ea05ae97300", // Andreas’ Nacht — аудиокниги (Германия)
+    "9085bd94-5e3d-4d15-a223-0588c235e11e"  // Rádio Litera (Словакия)
   ] },
   // «Детям» — вручную: русские станции первыми, дальше проверенные зарубежные. Проверены 17.10.2026
   { label: "Детям", en: "Kids", bg: "kids", ids: [
